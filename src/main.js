@@ -46,5 +46,5 @@ Windbarb(Highcharts)
 // import * as echarts from 'echarts'
 
 //全局数据
-const app = createApp(App).use(Layui).use(Highcharts).mount('#app')
+createApp(App).use(Layui).use(Highcharts).mount('#app')
 

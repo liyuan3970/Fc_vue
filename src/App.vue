@@ -14,7 +14,7 @@
     <radar_section ref="radar_section"></radar_section>
     <extra_single ref="extra_single_main"></extra_single>
   </div>
-  <div class="mainmap" ref="mapElement">
+  <div class="mainmap" id="mapmain">
   </div>
 </template>
 
@@ -25,7 +25,7 @@ import taizhoulocal from "./json/331000.json"
 import $ from 'jquery'
 // 组件的引用
 import { layer } from "@layui/layui-vue"
-import { reactive, toRaw, markRaw } from 'vue'
+// import { reactive, toRaw, markRaw } from 'vue'
 import { shallowRef } from 'vue'
 // import * as turf from '@turf/turf'
 // import { point, circle, bboxPolygon, booleanPointInPolygon } from '@turf/turf'
@@ -279,7 +279,7 @@ export default {
       docm.remove()
       if (that.maps) {
         that.current_layer.forEach(function (item) {
-          toRaw(that.maps).removeLayer(item)
+          that.maps.removeLayer(item)
         })
         that.current_points.forEach(function (item) {
           item.remove()
@@ -354,7 +354,7 @@ export default {
       L.control.logo = function (options) {
         return new L.Control.Logo(options)
       };
-      L.control.logo({ position: 'bottomright', data: "ok" }).addTo(toRaw(this.maps));
+      L.control.logo({ position: 'bottomright', data: "ok" }).addTo(this.maps);
     },
     plot_contour(contourf, coloropt) {
       // 绘制等值线
@@ -364,7 +364,7 @@ export default {
           return { color: feature.properties.stroke, weight: 0.5, fill: true, fillColor: feature.properties.stroke, fillOpacity: 0.7 };
         }
       })
-      plotlayer.addTo(toRaw(that.maps))
+      plotlayer.addTo(that.maps)
       // 绘制色bar
       that.add_colorbar(coloropt)
       that.current_layer.push(plotlayer)
@@ -756,7 +756,7 @@ export default {
               })
               .openTooltip();
             marker.setRotationAngle(item.WIN_D_Gust_Max);
-            points_list.push(toRaw(marker))
+            points_list.push(marker)
             // that.current_points.push(marker)
           }
         }
@@ -975,7 +975,7 @@ export default {
       var ciLayer = L.canvasMarkerLayer({
         collisionFlg: false
       }).addTo(that.maps)
-      toRaw(ciLayer).addLayers(toRaw(marks))
+      ciLayer.addLayers(marks)
       that.current_layer.push(ciLayer)
 
       ciLayer.addOnClickListener(function (e, data) {
@@ -1144,7 +1144,7 @@ export default {
     //   maxLayersInRow: 2
     // }
     // );
-    var map = L.map(this.$refs['mapElement'], {
+    var map = L.map("mapmain", {
       center: new L.LatLng(28.6, 120.9),//110.763, 41.376   39.62353145, 121.9937485
       crs: L.CRS.EPSG3857,
       renderer: canvasLabel,
