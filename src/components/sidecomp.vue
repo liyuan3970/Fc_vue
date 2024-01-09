@@ -513,13 +513,6 @@ export default {
     his_data,
     showing_table
   },
-  props: {
-    main2sider: {
-      type: Function,
-      require: true,
-      default: null,
-    },
-  },
   methods: {
     real_change(value) {
       let that = this
@@ -577,7 +570,8 @@ export default {
       var tables_index = tables_obj[value_index]
       var tables_name = this.model_side.cascader_value.slice(5, this.model_side.cascader_value.length)
       var model = "zdz"
-      var maindata = that.main2sider()
+      var maindata = that.$parent.main2siderfun()  
+
       var post_data = {
         "model": model,
         "table_type": maindata.datarange,//数据类型
@@ -597,14 +591,9 @@ export default {
         data: post_data,
         dataType: "json",
         success: function (recvdate) {
-          var send_data = {
-            "data": recvdate.data,
-            "send_type": "zdz",
-            "click_type": recvdate.click_type,
-            "tables_name": recvdate.tables_name
-          }
+          
           recve = recvdate.data
-          console.log("测试子组件调用父组件", that.$parent.warring_table_status)
+          
           // 全局参数调配
           that.$parent.flash_map()
           that.$parent.current_type = recvdate.click_type
@@ -615,6 +604,7 @@ export default {
             that.$parent.point_event(rain_points,"zdz")
           }
           else if (recvdate.click_type == "wind") {
+            console.log("测试子组件调用父组件", that.$parent.warring_table_status)
             var wind_points = that.$parent.plot_wind(data)
             if (that.$parent.all_seetings.wind_suf_opt == "barb") {
               that.$parent.mark_event(wind_points,"zdz")
@@ -765,7 +755,7 @@ export default {
         send_data.warring_opt = that.model_side.warring_opt
         that.$emit('side-event', send_data)
       }
-    }, 10000)
+    }, 1000)
   }
 
 }

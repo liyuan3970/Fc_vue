@@ -27,6 +27,7 @@ export default {
   methods: {
     changeVisible(start, end) {
       this.visible = true
+      console.log("测试数据",start, end)
       $.ajax({
         url: "http://127.0.0.1:9991/station_zdz_data",  // 请求的地址
         type: "post",  // 请求方式

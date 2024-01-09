@@ -9,7 +9,7 @@
       <buttontable></buttontable>
       <buttonhightchart></buttonhightchart>
       <button>测试按钮</button> -->
-    <sidecomp @side-event="sideEvent" :main2sider="main2siderfun"></sidecomp>
+    <sidecomp @side-event="sideEvent"></sidecomp>
     <warring_table ref="warring_table"></warring_table>
     <radar_section ref="radar_section"></radar_section>
     <extra_single ref="extra_single_main"></extra_single>
@@ -25,7 +25,7 @@ import taizhoulocal from "./json/331000.json"
 import $ from 'jquery'
 // 组件的引用
 import { layer } from "@layui/layui-vue"
-// import { reactive, toRaw, markRaw } from 'vue'
+import { reactive, toRaw, markRaw } from 'vue'
 import { shallowRef } from 'vue'
 // import * as turf from '@turf/turf'
 // import { point, circle, bboxPolygon, booleanPointInPolygon } from '@turf/turf'
@@ -152,110 +152,7 @@ export default {
       let that = this
       // 更具类型解析并判断如何调用方法
 
-      if (value.send_type == "zdz") {
-        // that.flash_map()
-        // if (that.all_seetings.rainopt) {
-        // }
-        // else {
-        // }
-        // var data = JSON.parse(value.data)
-        // var click_type = value.click_type
-        // that.current_type = click_type
-        // var tables_name = value.tables_name
-        // that.all_seetings.data_times = tables_name
-        // if (click_type == "rain") {
-        //   var rain_points = that.plot_rain(data)
-        //   that.point_event(rain_points)
-        // }
-        // else if (click_type == "wind") {
-        //   var wind_points = this.plot_wind(data)
-        //   if (that.all_seetings.wind_suf_opt == "barb") {
-        //     this.mark_event(wind_points)
-        //   }
-        //   else {
-        //     this.point_event(wind_points)
-        //   }
-        // }
-        // else if ((click_type == "tmax") || (click_type == "tmin")) {
-        //   var temp_points = that.plot_temp(data)
-        //   that.point_event(temp_points)
-        // }
-        // else if (click_type == "view") {
-        //   var view_points = that.plot_view(data)
-        //   that.point_event(view_points)
-        // }
 
-      }
-      if (value.send_type == "seeting") {
-        // that.all_seetings.shpopt = value.dataopt
-        // that.all_seetings.rainopt = value.rainopt
-        // that.all_seetings.windopt = value.windopt
-        // that.all_seetings.tempopt = value.tempopt
-        // that.all_seetings.viewopt = value.viewopt
-        // that.all_seetings.warring_rain_value = parseInt(value.rainrange)
-        // that.all_seetings.warring_wind_value = parseInt(value.windrange)
-        // that.all_seetings.warring_temp_value = parseInt(value.temprange)
-        // that.all_seetings.warring_view_value = parseInt(value.viewrange)
-      }
-      if (value.send_type == "warring") {
-        // 同步
-        // if ((value.real_flash_opt == "update") || (value.warring_opt == "warring")) {
-        //   that.flash_map()
-        //   // 数据操作
-        //   var contourf = JSON.parse(value.radar['imglist'][value.radar['imglist'].length - 1])
-        //   var colotopt = that.color_opt.radar
-        //   var rain = JSON.parse(value.rain)
-        //   var wind = JSON.parse(value.wind)
-        //   var rainList = that.update_user_data(rain)
-        //   var windList = that.update_user_data(wind)
-        //   const mergedArray = [...rainList, ...windList]
-        //   if (value.real_flash_opt == "update") {
-        //     // 更新地图
-        //     if (that.all_seetings.shpopt) {
-        //       if (localStorage.getItem("userName") != "none") {
-        //         var shpdata = JSON.parse(localStorage.getItem('userShp'))
-        //         var shplayer = L.geoJSON(shpdata, {
-        //           style: function (feature) {
-        //             return { color: 'red', weight: 1.5, fillOpacity: 0.01 };
-        //           }
-        //         })
-        //         shplayer.addTo(that.maps)
-        //         that.current_layer.push(shplayer)
-        //       }
-        //     }
-        //     // 绘图
-        //     that.all_seetings.data_times = "5min"
-        //     that.plot_contour(contourf, colotopt)
-        //     // 绘图降水
-        //     var rain_points = this.plot_rain(rain)
-        //     this.point_event(rain_points)
-        //     // 绘图风力
-        //     that.all_seetings.wind_suf_opt = "barb"
-        //     var wind_points = this.plot_wind(wind)
-        //     this.mark_event(wind_points)
-        //   }
-        //   if (value.warring_opt == "warring") {
-        //     if (mergedArray.length > 0) {
-        //       that.mp3_play = true
-        //     }
-        //     else {
-        //       that.mp3_play = false
-        //     }
-        //   }
-        //   // 打开表格
-        //   // console.log("报警的数据", mergedArray)
-        //   this.$refs.warring_table.opentable(true, mergedArray)
-        // }
-        // else if (value.real_flash_opt == "silence") {
-        //   that.all_seetings.real_flash_opt = value.real_flash_opt
-        //   this.$refs.warring_table.opentable(false, undefined)
-        // }
-        // else if (value.warring_opt == "silence") {
-        //   that.all_seetings.warring_opt = value.warring_opt
-        //   that.mp3_play = false
-        // }
-
-      }
       if (value.send_type == "real_seeting") {
         //雷达剖面
         that.all_seetings.radar_opt = value.radar_opt
@@ -748,16 +645,43 @@ export default {
               icon: icon,
               rotate: item.WIN_D_Gust_Max,
               rotationAngle: item.WIN_D_Gust_Max,
-              zIndex: 50000
+              zIndex: 5000000
             })
-              .bindTooltip(tooltips, {
-                direction: "top",
-                offset: L.point(0, -10)
-              })
-              .openTooltip();
+            .bindTooltip(tooltips, {
+              direction: "top",
+              offset: L.point(0, -10)
+            })
+            .openTooltip();
             marker.setRotationAngle(item.WIN_D_Gust_Max);
             points_list.push(marker)
-            // that.current_points.push(marker)
+            //换个策略
+            // var datobj = {
+            //   lat: item.Lat,
+            //   lon: item.Lon,
+            //   iconopt: {
+            //     iconUrl: iconurl,
+            //     iconSize: [70, 50],
+            //     rotate: item.WIN_D_Gust_Max,
+            //     rotationAngle: item.WIN_D_Gust_Max,
+            //     stationnum: item.Station_Id_C,
+            //     stationname: item.Station_Name,
+            //     iconAnchor: [35, 35]
+            //   },
+            //   markopt: {
+            //     icon: undefined,
+            //     rotate: item.WIN_D_Gust_Max,
+            //     rotationAngle: item.WIN_D_Gust_Max,
+            //     zIndex: 5000000
+            //   },
+            //   tooltips: tooltips,
+            //   tipsopt: {
+            //     direction: "top",
+            //     offset: L.point(0, -10)
+            //   }
+
+            // }
+            // points_list.push(datobj)
+
           }
         }
         else {
@@ -953,12 +877,12 @@ export default {
       // 绘制单点数据
       let that = this
       points.forEach(function (item, index) {
-
+        // console.log("测试",toRaw(item),toRaw(that.maps))
         item.bindTooltip(that.current_labels[index], {
           direction: "top",
           offset: L.point(0, -10)
         }).openTooltip()
-        item.addTo(that.maps).on("click", function (e) {
+        item.addTo(toRaw(that.maps)).on("click", function (e) {
           var station_id = undefined
           var plot_type = that.current_type
           var plot_num = e.sourceTarget.options.stationnum
@@ -977,6 +901,23 @@ export default {
       }).addTo(that.maps)
       ciLayer.addLayers(marks)
       that.current_layer.push(ciLayer)
+      // var wind_list = []
+      // marks.forEach(function (item) {
+      //   var latlng = L.latLng(item.Lat, item.Lon);
+      //   var icon = L.icon(item.iconopt);
+      //   var markopt = item.markopt
+      //   markopt.icon = icon
+      //   var latlng = L.latLng(item.lat, item.lon)
+      //   var marker = L.marker(latlng,markopt).bindTooltip(item.tooltips, {
+      //     direction: "top",
+      //     offset: L.point(0, -10)
+      //   }).openTooltip();
+      //   marker.setRotationAngle(item.iconopt.rotationAngle);
+      //   wind_list.push(marker)
+      // })
+      // ciLayer.addLayers(wind_list)  
+
+
 
       ciLayer.addOnClickListener(function (e, data) {
         var station_id = undefined
@@ -987,6 +928,9 @@ export default {
         that.$refs.extra_single_main.open_single(plot_type, plot_num)
         // console.log("标记mark", e, data)
       })
+      ciLayer.addOnHoverListener(function (e, data) {
+        // console.log(toRaw(data), "666", data[0].data._leaflet_id)
+      });
 
 
 
