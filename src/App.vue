@@ -71,7 +71,12 @@ export default {
       mp3_play: false,
       warring_table_status: false,
       map_lines: undefined,
-      wind_label:undefined,
+      wind_label: undefined,
+      themes:{
+        color:"white",
+        windurl:"src/media/wind_white/",
+        fontsize:1.5
+      },
       all_seetings: {
         datarange: 'auto',//数据显示的范围
         wind_suf_opt: "barb",//风场的渲染方式
@@ -183,45 +188,6 @@ export default {
           item.remove()
         })
       }
-
-
-      if (that.all_seetings.map_class == "geo") {
-        L.TileLayer.Custom = L.TileLayer.extend({
-          getTileUrl: function (coords) {
-            var url = 'src/maps/map_geo/' + coords.z + '/' + coords.x + '/' + coords.y + '.jpg';
-            return url;
-          }
-        })
-        L.tileLayer.Custom = function () { return new L.TileLayer.Custom(); }
-        var layer_geo = L.tileLayer.Custom()
-        layer_geo.addTo(that.maps)
-        if (that.map_lines) {
-          that.map_lines.remove()
-
-        }
-      }
-      else {
-        // layer_geo.remove()
-        L.TileLayer.Custom = L.TileLayer.extend({
-          getTileUrl: function (coords) {
-            var url = 'src/maps/map_street/' + coords.z + '/' + coords.x + '/' + coords.y + '.png';
-            return url;
-          }
-        })
-        L.tileLayer.Custom = function () { return new L.TileLayer.Custom(); }
-        var layer_street = L.tileLayer.Custom()
-        layer_street.addTo(that.maps)
-        var lines = L.geoJSON(zhejianglist, {
-          style: function (feature) {
-            return { color: feature.properties.color, fill: true, weight: 3, fillOpacity: 0.4 };
-            // return { color: 'black', fill: true, weight: 3, fillOpacity: 0.1 };
-          }
-        })
-        that.map_lines = lines
-        lines.addTo(that.maps)
-
-      }
-
     },
     add_colorbar(coloropt) {
       var docm = $('.leaflet-control-colotlabel')
@@ -291,7 +257,7 @@ export default {
             text: text_item,
             collisionFlg: false,
             // offsetY: -25,
-            scale: 1.05,
+            scale: that.themes.fontsize,
             weight: 3,
             rotation: 0,
             fillStyle: colors,
@@ -345,7 +311,7 @@ export default {
           if (item.value > 0 && item.value < 9999) {
 
             if (item.value > 0 && item.value <= 1) {
-              var colors = "white"
+              var colors = that.themes.color
             }
             else if (item.value > 1 && item.value <= 1.5) {
               var colors = "rgb(140,246,130)"
@@ -374,7 +340,7 @@ export default {
           if (item.value > 0 && item.value <= 9999) {
 
             if (item.value > 0 && item.value <= 1) {
-              var colors = "white"
+              var colors = that.themes.color
             }
             else if (item.value > 1 && item.value <= 10) {
               var colors = "rgb(140,246,130)"
@@ -410,7 +376,7 @@ export default {
           if (item.value > 0 && item.value <= 9999) {
 
             if (item.value > 0 && item.value <= 1) {
-              var colors = "white"
+              var colors = that.themes.color
             }
             else if (item.value > 1 && item.value <= 5) {
               var colors = "rgb(140,246,130)"
@@ -444,7 +410,7 @@ export default {
           if (item.value > 0 && item.value <= 9999) {
 
             if (item.value > 0 && item.value <= 1) {
-              var colors = "white"
+              var colors = that.themes.color
             }
             else if (item.value > 1 && item.value <= 4) {
               var colors = "rgb(140,246,130)"
@@ -478,7 +444,7 @@ export default {
           if (item.value > 0 && item.value <= 9999) {
 
             if (item.value > 0 && item.value <= 1) {
-              var colors = "white"
+              var colors = that.themes.color
             }
             else if (item.value > 1 && item.value <= 3) {
               var colors = "rgb(140,246,130)"
@@ -513,7 +479,7 @@ export default {
           if (item.value > 0 && item.value <= 9999) {
 
             if (item.value > 0 && item.value <= 1) {
-              var colors = "white"
+              var colors = that.themes.color
             }
             else if (item.value > 1 && item.value <= 10) {
               var colors = "rgb(140,246,130)"
@@ -605,31 +571,31 @@ export default {
             var tooltips = item.Station_Name + "-" + item.Station_Id_C + "<br>" + "    纬度:" + item.Lat.toFixed(2).toString() + "  " + "经度:" + item.Lon.toFixed(2).toString() + "<br>" + "    " + item.City + "-" + item.Cnty + "-" + item.Town
             that.current_labels.push(tooltips)
             if (((item.value > 0) && (item.value <= 4)) || ((item.WIN_S_Gust_Max > 0) && (item.WIN_S_Gust_Max <= 4))) {
-              var iconurl = "src/media/wind/1.svg"
+              var iconurl = that.themes.windurl+"1.svg"
             }
             else if (((item.value > 4) && (item.value <= 8)) || ((item.WIN_S_Gust_Max > 4) && (item.WIN_S_Gust_Max <= 8))) {
-              var iconurl = "src/media/wind/2.svg"
+              var iconurl = that.themes.windurl+"2.svg"
             }
             else if (((item.value > 8) && (item.value <= 10)) || ((item.WIN_S_Gust_Max > 8) && (item.WIN_S_Gust_Max <= 10))) {
-              var iconurl = "src/media/wind/3.svg"
+              var iconurl = that.themes.windurl+"3.svg"
             }
             else if (((item.value > 10) && (item.value <= 12)) || ((item.WIN_S_Gust_Max > 10) && (item.WIN_S_Gust_Max <= 12))) {
-              var iconurl = "src/media/wind/5.svg"
+              var iconurl = that.themes.windurl+"5.svg"
             }
             else if (((item.value > 12) && (item.value <= 14)) || ((item.WIN_S_Gust_Max > 12) && (item.WIN_S_Gust_Max <= 14))) {
-              var iconurl = "src/media/wind/6.svg"
+              var iconurl = that.themes.windurl+"6.svg"
             }
             else if (((item.value > 14) && (item.value <= 16)) || ((item.WIN_S_Gust_Max > 14) && (item.WIN_S_Gust_Max <= 16))) {
-              var iconurl = "src/media/wind/7.svg"
+              var iconurl = that.themes.windurl+"7.svg"
             }
             else if (((item.value > 16) && (item.value <= 17.2)) || ((item.WIN_S_Gust_Max > 16) && (item.WIN_S_Gust_Max <= 17.2))) {
-              var iconurl = "src/media/wind/8.svg"
+              var iconurl = that.themes.windurl+"8.svg"
             }
             else if (((item.value > 17.2) && (item.value <= 19)) || ((item.WIN_S_Gust_Max > 17.2) && (item.WIN_S_Gust_Max <= 19))) {
-              var iconurl = "src/media/wind/9.svg"
+              var iconurl = that.themes.windurl+"9.svg"
             }
             else {
-              var iconurl = "src/media/wind/10.svg"
+              var iconurl = that.themes.windurl+"10.svg"
             }
             // 常规方法
             // var latlng = L.latLng(item.Lat, item.Lon);
@@ -670,7 +636,7 @@ export default {
               },
               markopt: {
                 icon: undefined,
-                tooltips:tooltips,
+                tooltips: tooltips,
                 rotate: item.WIN_D_Gust_Max,
                 rotationAngle: item.WIN_D_Gust_Max,
                 zIndex: 5000000
@@ -750,7 +716,7 @@ export default {
                 text: texts,
                 collisionFlg: iflabel,
                 fillStyle: colors,
-                scale: 1.15,
+                scale: that.themes.fontsize,
                 weight: 3,
                 rotation: 0,
                 color: "red",
@@ -801,7 +767,7 @@ export default {
               text: item.value,
               collisionFlg: iflabel,
               fillStyle: colors,
-              scale: 1.5,
+              scale: that.themes.fontsize,
               weight: 5,
               rotation: 0,
               zIndex: 60
@@ -858,7 +824,7 @@ export default {
             labelStyle: {
               text: item.value,
               collisionFlg: iflabel,
-              scale: 1.5, // 字体大小
+              scale: that.themes.fontsize, // 字体大小
               fillStyle: colors,  // 颜色
               weight: 2000,
               rotation: 0,
@@ -910,7 +876,7 @@ export default {
         var markopt = item.markopt
         markopt.icon = icon
         var latlng = L.latLng(item.lat, item.lon)
-        var marker = L.marker(latlng,markopt)
+        var marker = L.marker(latlng, markopt)
         // .bindTooltip(item.tooltips, {
         //   direction: "top",
         //   offset: L.point(0, -10)
@@ -918,7 +884,7 @@ export default {
         marker.setRotationAngle(item.iconopt.rotationAngle);
         wind_list.push(marker)
       })
-      ciLayer.addLayers(wind_list)  
+      ciLayer.addLayers(wind_list)
       that.current_layer.push(ciLayer)
       ciLayer.addOnClickListener(function (e, data) {
         var station_id = undefined
@@ -930,9 +896,7 @@ export default {
         // console.log("标记mark", e, data)
       })
       ciLayer.addOnHoverListener(function (e, data) {
-        // console.log(toRaw(data), "666", data[0].data._leaflet_id)
-        // console.log(data[0],data[0].data.options.tooltips)
-        if (that.wind_label){
+        if (that.wind_label) {
           toRaw(that.wind_label).remove()
         }
         var latlng = L.latLng(data[0].data._latlng.lat, data[0].data._latlng.lng);
@@ -944,16 +908,12 @@ export default {
           zIndex: 1,
           fillOpacity: 1
         }).addTo(toRaw(that.maps))
-        .bindTooltip(data[0].data.options.tooltips, {
-          direction: "top",
-          offset: L.point(0, -10)
-        }).openTooltip() 
+          .bindTooltip(data[0].data.options.tooltips, {
+            direction: "top",
+            offset: L.point(0, -10)
+          }).openTooltip()
         that.wind_label = toRaw(c)
-
       });
-
-
-
     },
     update_user_data(data) {
       let that = this
@@ -1080,88 +1040,90 @@ export default {
     })
     L.tileLayer.Custom = function () { return new L.TileLayer.Custom(); }
     var layer_geo = L.tileLayer.Custom()
-    // L.TileLayer.Custom = L.TileLayer.extend({
-    //   getTileUrl: function (coords) {
-    //     var url = 'src/maps/map_street/' + coords.z + '/' + coords.x + '/' + coords.y + '.png';
-    //     return url;
-    //   }
-    // })
-    // L.tileLayer.Custom = function () { return new L.TileLayer.Custom(); }
-    // var layer_street = L.tileLayer.Custom()
-
-    // //
-    // var iconLayersControl = new L.Control.IconLayers(
-    //   [
-    //     {
-    //       title: '地形', // use any string
-    //       layer: layer_geo, // any ILayer
-    //       icon: 'src/maps/imgs/geo.png' // 80x80 icon
-    //     },
-    //     {
-    //       title: '街道',
-    //       layer: layer_street,
-    //       icon: 'src/maps/imgs/street.png'
-    //     }
-    //   ], {
-    //   position: 'bottomleft',
-    //   id: "mapicon",
-    //   maxLayersInRow: 2
-    // }
-    // );
+    L.TileLayer.Custom = L.TileLayer.extend({
+      getTileUrl: function (coords) {
+        var url = 'src/maps/map_street/' + coords.z + '/' + coords.x + '/' + coords.y + '.png';
+        return url;
+      }
+    })
+    L.tileLayer.Custom = function () { return new L.TileLayer.Custom(); }
+    var layer_street = L.tileLayer.Custom()
     var map = L.map("mapmain", {
       center: new L.LatLng(28.6, 120.9),//110.763, 41.376   39.62353145, 121.9937485
       crs: L.CRS.EPSG3857,
       renderer: canvasLabel,
       zoom: 9, //4
       maxZoom: 12,
-      minZoom: 6,
+      minZoom: 8,
       zoomControl: false,
       dragging: true,
       scrollWheelZoom: true,
       doubleClickZoom: false,
       attributionControl: false, //是否去除右下角标志
-      // maxBounds: bound,
-      // maxBoundsViscosity: 1.0,
-      layers: [lines]
+      maxBounds: bound,
+      maxBoundsViscosity: 1.0,
+      layers: []
     });
-    // iconLayersControl.addTo(map);
-    // that.current_labels.push(layer_geo)
-    layer_geo.addTo(map)
-    // if (this.all_seetings.map_class == "geo") {
-    //   layer_geo.addTo(map)
-    // }
-    // else {
-    //   layer_street.addTo(map)
-    // }
+    // layer_geo.addTo(map)
+    var linecolor = L.geoJSON(zhejianglist, {
+          style: function (feature) {
+            return { color: feature.properties.color, fill: true, weight: 0, fillOpacity: 1 };
+          }
+        })
+    // 地形图层
+    var geogroup = L.layerGroup();
+    layer_geo.addTo(geogroup)
+    lines.addTo(geogroup)
+    // 街道图层
+    var streetgroup = L.layerGroup();
+    layer_street.addTo(streetgroup)
+    lines.addTo(streetgroup)
 
-    // new L.basemapsSwitcher([
-    //   {
-    //     layer: layer_geo, //DEFAULT MAP
-    //     icon: './assets/images/geo.png',
-    //     name: '地形'
-    //   },
-    //   {
-    //     layer:layer_street.addTo(map),
-    //     icon: './assets/images/street.png',
-    //     name: '街道'
-    //   }
-    // ], { position: 'topleft' }).addTo(map);
-
+    // 纯净图层
+    var cleangroup = L.layerGroup();
+    linecolor.addTo(cleangroup)
+    lines.addTo(cleangroup)
+    var baseLayers = {
+      '地形': geogroup.addTo(map),
+      '街道': streetgroup,
+      "纯净":cleangroup
+    };
+    // 额外图层---测试
+    var cities1 = L.layerGroup();
+    var cities2 = L.layerGroup();
+    //声明两个城市marker并添加进图层组
+    var linyi = L.marker([28.01, 121.24]).bindPopup('这里属于青岛').addTo(cities1);
+    var qingdao = L.marker([28.51, 120.92]).bindPopup('这里属于临沂').addTo(cities2);
+    var overlays = {
+      '市界': cities1,
+      '县界': cities2,
+      '乡镇名': cities2,
+      '站名': cities2,
+      '风力': cities2,
+    };
+    // 最后整合
+    var layerControl = L.control.layers(baseLayers, overlays)
+    layerControl.options.position = "topleft"
+    console.log(layerControl) 
+    layerControl.addTo(map);
     this.maps = map
-    // 开启绘图模式
-    // if (that.all_seetings.radar_sec.plot_opt) {
-    //   map.on('click', that.fclick)
-    // }
-    // else {
-    //   map.off('click', that.fclick);
-    //   map.off('click', that.sclick);
-    //   map.off('mousemove', that.mmove);
-    //   if (that.all_seetings.radar_sec.line) {
-    //     if (map.hasLayer(that.all_seetings.radar_sec.line)) { //清除当前折线
-    //       map.removeLayer(that.all_seetings.radar_sec.line);
-    //     }
-    //   }
-    // }
+    map.on("baselayerchange",function(e){
+      // 监听
+      switch (e.name){
+        case "地形":
+          console.log("1",e.name);
+          that.themes.windurl ="src/media/wind_white/"
+          break;
+        case "街道":
+          console.log("2",e.name);
+          that.themes.windurl ="src/media/wind_black/"
+          break;
+        case "纯净":
+          console.log("3",e.name);
+          that.themes.windurl ="src/media/wind_black/"
+          break;
+      }
+    })
 
     // 循环监听
     window.setInterval(function () {
