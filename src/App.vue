@@ -71,6 +71,7 @@ export default {
       mp3_play: false,
       warring_table_status: false,
       map_lines: undefined,
+      wind_label:undefined,
       all_seetings: {
         datarange: 'auto',//数据显示的范围
         wind_suf_opt: "barb",//风场的渲染方式
@@ -596,7 +597,6 @@ export default {
       }
       let that = this
       var points_list = []
-
       data.forEach(function (item) {
 
         if (that.all_seetings.wind_suf_opt == "barb") {
@@ -631,56 +631,58 @@ export default {
             else {
               var iconurl = "src/media/wind/10.svg"
             }
-            var latlng = L.latLng(item.Lat, item.Lon);
-            var icon = L.icon({
-              iconUrl: iconurl,
-              iconSize: [70, 50],
-              rotate: item.WIN_D_Gust_Max,
-              rotationAngle: item.WIN_D_Gust_Max,
-              stationnum: item.Station_Id_C,
-              stationname: item.Station_Name,
-              iconAnchor: [35, 35]
-            });
-            var marker = L.marker(latlng, {
-              icon: icon,
-              rotate: item.WIN_D_Gust_Max,
-              rotationAngle: item.WIN_D_Gust_Max,
-              zIndex: 5000000
-            })
-            .bindTooltip(tooltips, {
-              direction: "top",
-              offset: L.point(0, -10)
-            })
-            .openTooltip();
-            marker.setRotationAngle(item.WIN_D_Gust_Max);
-            points_list.push(marker)
+            // 常规方法
+            // var latlng = L.latLng(item.Lat, item.Lon);
+            // var icon = L.icon({
+            //   iconUrl: iconurl,
+            //   iconSize: [70, 50],
+            //   rotate: item.WIN_D_Gust_Max,
+            //   rotationAngle: item.WIN_D_Gust_Max,
+            //   stationnum: item.Station_Id_C,
+            //   stationname: item.Station_Name,
+            //   iconAnchor: [35, 35]
+            // });
+            // var marker = L.marker(latlng, {
+            //   icon: icon,
+            //   rotate: item.WIN_D_Gust_Max,
+            //   rotationAngle: item.WIN_D_Gust_Max,
+            //   zIndex: 5000000
+            // })
+            // .bindTooltip(tooltips, {
+            //   direction: "top",
+            //   offset: L.point(0, -10)
+            // })
+            // .openTooltip();
+            // marker.setRotationAngle(item.WIN_D_Gust_Max);
+            // points_list.push(marker)
             //换个策略
-            // var datobj = {
-            //   lat: item.Lat,
-            //   lon: item.Lon,
-            //   iconopt: {
-            //     iconUrl: iconurl,
-            //     iconSize: [70, 50],
-            //     rotate: item.WIN_D_Gust_Max,
-            //     rotationAngle: item.WIN_D_Gust_Max,
-            //     stationnum: item.Station_Id_C,
-            //     stationname: item.Station_Name,
-            //     iconAnchor: [35, 35]
-            //   },
-            //   markopt: {
-            //     icon: undefined,
-            //     rotate: item.WIN_D_Gust_Max,
-            //     rotationAngle: item.WIN_D_Gust_Max,
-            //     zIndex: 5000000
-            //   },
-            //   tooltips: tooltips,
-            //   tipsopt: {
-            //     direction: "top",
-            //     offset: L.point(0, -10)
-            //   }
+            var datobj = {
+              lat: item.Lat,
+              lon: item.Lon,
+              iconopt: {
+                iconUrl: iconurl,
+                iconSize: [70, 50],
+                rotate: item.WIN_D_Gust_Max,
+                rotationAngle: item.WIN_D_Gust_Max,
+                stationnum: item.Station_Id_C,
+                stationname: item.Station_Name,
+                iconAnchor: [35, 35]
+              },
+              markopt: {
+                icon: undefined,
+                tooltips:tooltips,
+                rotate: item.WIN_D_Gust_Max,
+                rotationAngle: item.WIN_D_Gust_Max,
+                zIndex: 5000000
+              },
+              tooltips: tooltips,
+              tipsopt: {
+                direction: "top",
+                offset: L.point(0, -10)
+              }
 
-            // }
-            // points_list.push(datobj)
+            }
+            points_list.push(datobj)
 
           }
         }
@@ -899,26 +901,25 @@ export default {
       var ciLayer = L.canvasMarkerLayer({
         collisionFlg: false
       }).addTo(that.maps)
-      ciLayer.addLayers(marks)
+      // ciLayer.addLayers(marks)
+      // that.current_layer.push(ciLayer)
+      var wind_list = []
+      marks.forEach(function (item) {
+        var latlng = L.latLng(item.Lat, item.Lon);
+        var icon = L.icon(item.iconopt);
+        var markopt = item.markopt
+        markopt.icon = icon
+        var latlng = L.latLng(item.lat, item.lon)
+        var marker = L.marker(latlng,markopt)
+        // .bindTooltip(item.tooltips, {
+        //   direction: "top",
+        //   offset: L.point(0, -10)
+        // }).openTooltip();
+        marker.setRotationAngle(item.iconopt.rotationAngle);
+        wind_list.push(marker)
+      })
+      ciLayer.addLayers(wind_list)  
       that.current_layer.push(ciLayer)
-      // var wind_list = []
-      // marks.forEach(function (item) {
-      //   var latlng = L.latLng(item.Lat, item.Lon);
-      //   var icon = L.icon(item.iconopt);
-      //   var markopt = item.markopt
-      //   markopt.icon = icon
-      //   var latlng = L.latLng(item.lat, item.lon)
-      //   var marker = L.marker(latlng,markopt).bindTooltip(item.tooltips, {
-      //     direction: "top",
-      //     offset: L.point(0, -10)
-      //   }).openTooltip();
-      //   marker.setRotationAngle(item.iconopt.rotationAngle);
-      //   wind_list.push(marker)
-      // })
-      // ciLayer.addLayers(wind_list)  
-
-
-
       ciLayer.addOnClickListener(function (e, data) {
         var station_id = undefined
         var plot_type = that.current_type
@@ -930,6 +931,25 @@ export default {
       })
       ciLayer.addOnHoverListener(function (e, data) {
         // console.log(toRaw(data), "666", data[0].data._leaflet_id)
+        // console.log(data[0],data[0].data.options.tooltips)
+        if (that.wind_label){
+          toRaw(that.wind_label).remove()
+        }
+        var latlng = L.latLng(data[0].data._latlng.lat, data[0].data._latlng.lng);
+        var c = L.circleMarker(latlng, {
+          weight: 0,
+          radius: 20,
+          opacity: 0,
+          fill: false,
+          zIndex: 1,
+          fillOpacity: 1
+        }).addTo(toRaw(that.maps))
+        .bindTooltip(data[0].data.options.tooltips, {
+          direction: "top",
+          offset: L.point(0, -10)
+        }).openTooltip() 
+        that.wind_label = toRaw(c)
+
       });
 
 
