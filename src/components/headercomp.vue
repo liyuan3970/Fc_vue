@@ -48,9 +48,12 @@
               <lay-radio v-model="model_set.wind_suf_opt" value="barb" label="风羽"></lay-radio>
               <lay-radio v-model="model_set.wind_suf_opt" value="label" label="标签"></lay-radio>
             </lay-form-item>
-            <lay-form-item label="地图选项">
-              <lay-radio v-model="model_set.map_class" value="geo" label="地形"></lay-radio>
-              <lay-radio v-model="model_set.map_class" value="street" label="街道"></lay-radio>
+            <lay-form-item label="文字大小">
+              <lay-select style="width: 68%;" v-model="model_set.fontsize">
+                <lay-select-option value="1.15" label="小"></lay-select-option>
+                <lay-select-option value="1.8" label="中"></lay-select-option>
+                <lay-select-option value="2.5" label="大"></lay-select-option>
+              </lay-select>
             </lay-form-item>
             <lay-form-item label="数据级别">
               <lay-select style="width: 68%;" v-model="model_set.datarange">
@@ -99,7 +102,7 @@ export default {
             this.$parent.all_seetings.datarange = this.model_set.datarange
             this.$parent.all_seetings.wind_suf_opt = this.model_set.wind_suf_opt
             this.$parent.all_seetings.boundary_type = this.model_set.boundary_type
-            this.$parent.all_seetings.map_class = this.model_set.map_class
+            this.$parent.themes.fontsize = this.model_set.fontsize
             this.$parent.flash_map()
             // this.$emit('header-event', this.model_set)
             this.visible_set = false
@@ -117,7 +120,7 @@ export default {
         datarange: 'auto',
         wind_suf_opt: "barb",
         boundary_type: "current",
-        map_class:"geo"
+        fontsize:"1.8"
       },
       usertext: "",
       userlocal:undefined,

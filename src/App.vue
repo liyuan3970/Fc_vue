@@ -75,7 +75,7 @@ export default {
       themes:{
         color:"white",
         windurl:"src/media/wind_white/",
-        fontsize:1.5
+        fontsize:1.8
       },
       all_seetings: {
         datarange: 'auto',//数据显示的范围

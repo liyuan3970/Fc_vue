@@ -39,10 +39,10 @@ L 0 -150
 L 40 -162.5 
 L 0 -150 
 z
-" id="m71c34bda5b" style="stroke:#000000;stroke-width:8;"/>
+" id="mf84c79d475" style="stroke:#000000;stroke-width:20;"/>
     </defs>
-    <g clip-path="url(#pd2c78b5da5)">
-     <use style="stroke:#000000;stroke-width:8;" x="191.808" xlink:href="#m71c34bda5b" y="285.408"/>
+    <g clip-path="url(#p894bc41df0)">
+     <use style="stroke:#000000;stroke-width:20;" x="191.808" xlink:href="#mf84c79d475" y="285.408"/>
     </g>
    </g>
    <g id="Barbs_2"/>
@@ -51,7 +51,7 @@ z
   </g>
  </g>
  <defs>
-  <clipPath id="pd2c78b5da5">
+  <clipPath id="p894bc41df0">
    <rect height="266.112" width="133.056" x="169.632" y="41.472"/>
   </clipPath>
  </defs>
