@@ -1,22 +1,20 @@
 <template>
   <div>
-    <lay-layer 
-      v-model="visible" 
-      :shade="false" 
-      :area="['550px', '450px']" 
-      :title=title 
-      :offset="offset"
-      
+    <lay-layer v-model="visible" :shade="false" :area="['550px', '450px']" :title=title :offset="offset"
       :titleStyle="titleStyle">
-      
+
       <div style="width: 100%;height: 100%;overflow-y: hidden;">
-        <lay-table :default-toolbar="false" :columns="columns" :data-source="dataSource" @change="change" :page="model.page" height="400px">
+        <lay-table :default-toolbar="false" :columns="columns" :data-source="dataSource" @change="change"  @row="rowchange"
+          :page="model.page" height="400px">
           <template #toolbar>
-            <lay-input v-model="model.input" style="width: 60%;margin-right: 20px;"></lay-input>
+            <lay-input v-model="model.input" style="width: 30%;margin-right: 20px;"></lay-input>
             <lay-button type="primary" size="sm" @click="reset">重置</lay-button>
             <lay-button type="primary" size="sm" @click="search">搜索</lay-button>
             <lay-button type="primary" size="sm" @click="user">筛选</lay-button>
+            <lay-button type="primary" size="sm" @click="stationinfo">显示站名</lay-button>
+            <lay-button type="primary" size="sm" @click="stationinfo">显示乡镇</lay-button>
           </template>
+          
         </lay-table>
       </div>
     </lay-layer>
@@ -34,7 +32,7 @@ export default {
       offset: "tr",
       model: {
         input: "",
-        page:{ current: 1, limit: 10, total: 100 },
+        page: { current: 1, limit: 10, total: 100 },
       },
       titleStyle: {
         "color": "white",
@@ -55,14 +53,22 @@ export default {
     }
   },
   methods: {
+    rowchange(e){
+      let that =this
+      // console.log(e.Lat,"开始操作这一行的数据",that.$parent.$parent.themes)
+      that.$parent.$parent.maps.setView([e.Lat, e.Lon], 9)   
+    },
+    stationinfo(){
+
+    },
     reset() {
       let that = this
       if (that.dataSource.length > 0) {
         that.dataSource = []
-        that.dataSource = that.bakdata.slice(0,(that.model.page.limit-1))
+        that.dataSource = that.bakdata.slice(0, (that.model.page.limit - 1))
       }
       else {
-        that.dataSource = that.bakdata.slice(0,(that.model.page.limit-1))
+        that.dataSource = that.bakdata.slice(0, (that.model.page.limit - 1))
       }
     },
     search() {
@@ -75,7 +81,7 @@ export default {
         }
       })
       that.dataSource = []
-      that.dataSource = search_data.slice(0, (that.model.page.limit-1))
+      that.dataSource = search_data.slice(0, (that.model.page.limit - 1))
       that.bakdata = search_data
     },
     user() {
@@ -89,7 +95,7 @@ export default {
           }
         })
         that.dataSource = []
-        that.dataSource = search_data.slice(0, (that.model.page.limit-1))
+        that.dataSource = search_data.slice(0, (that.model.page.limit - 1))
         that.bakdata = search_data
       }
       else {
@@ -102,7 +108,7 @@ export default {
           }
         })
         that.dataSource = []
-        that.dataSource = search_data.slice(0, (that.model.page.limit-1))
+        that.dataSource = search_data.slice(0, (that.model.page.limit - 1))
         that.bakdata = search_data
       }
     },
@@ -111,18 +117,18 @@ export default {
       that.dataSource = []
       that.bakdata = []
       that.visible = status
-      var current_data = data.slice(0, (that.model.page.limit-1))
+      var current_data = data.slice(0, (that.model.page.limit - 1))
       that.dataSource = current_data
       that.bakdata = data
     },
-    change(page){
+    change(page) {
       let that = this
-      var start = (page.current-1)*that.model.page.limit
-      var end = (page.current)*that.model.page.limit - 1 
-      var current_data = that.bakdata.slice(start,end)
+      var start = (page.current - 1) * that.model.page.limit
+      var end = (page.current) * that.model.page.limit - 1
+      var current_data = that.bakdata.slice(start, end)
       that.dataSource = current_data
       // setTimeout(() => {
-        
+
       // }, 1000);
     }
 

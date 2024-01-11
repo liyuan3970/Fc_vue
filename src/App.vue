@@ -22,11 +22,14 @@
 // 静态数据的引用
 import zhejianglist from "./json/zhejianglist.json"
 import taizhoulocal from "./json/331000.json"
+import zhejiangcnty from './json/zhejiangcnty.json'
+import zhejiangtownname from './json/zhejiangtownname'
 import $ from 'jquery'
 // 组件的引用
 import { layer } from "@layui/layui-vue"
 import { reactive, toRaw, markRaw } from 'vue'
 import { shallowRef } from 'vue'
+
 // import * as turf from '@turf/turf'
 // import { point, circle, bboxPolygon, booleanPointInPolygon } from '@turf/turf'
 import L from 'leaflet'
@@ -72,10 +75,10 @@ export default {
       warring_table_status: false,
       map_lines: undefined,
       wind_label: undefined,
-      themes:{
-        color:"white",
-        windurl:"src/media/wind_white/",
-        fontsize:1.8
+      themes: {
+        color: "white",
+        windurl: "src/media/wind_white/",
+        fontsize: 1.8
       },
       all_seetings: {
         datarange: 'auto',//数据显示的范围
@@ -177,6 +180,7 @@ export default {
       that.plot_data = undefined
       that.plot_type = undefined
       that.plot_colors = undefined
+      that.layer_points = []
       that.current_labels = []
       var docm = $('.leaflet-control-colotlabel')
       docm.remove()
@@ -279,7 +283,7 @@ export default {
         that.current_labels.push(tooltips)
         if (that.all_seetings.data_times == "5min") {
           if (item.PRE > 0.1 && item.PRE <= 9999) {
-
+            
             if (item.PRE > 0 && item.PRE <= 0.5) {
               // console.log("降水", item)
               var colors = "rgb(140,246,130)"
@@ -309,7 +313,7 @@ export default {
         }
         else if (that.all_seetings.data_times == "now") {
           if (item.value > 0 && item.value < 9999) {
-
+            
             if (item.value > 0 && item.value <= 1) {
               var colors = that.themes.color
             }
@@ -338,7 +342,7 @@ export default {
         }
         else if (that.all_seetings.data_times == "24hours") {
           if (item.value > 0 && item.value <= 9999) {
-
+             
             if (item.value > 0 && item.value <= 1) {
               var colors = that.themes.color
             }
@@ -374,7 +378,7 @@ export default {
         }
         else if (that.all_seetings.data_times == "12hours") {
           if (item.value > 0 && item.value <= 9999) {
-
+             
             if (item.value > 0 && item.value <= 1) {
               var colors = that.themes.color
             }
@@ -408,7 +412,7 @@ export default {
         }
         else if (that.all_seetings.data_times == "6hours") {
           if (item.value > 0 && item.value <= 9999) {
-
+            
             if (item.value > 0 && item.value <= 1) {
               var colors = that.themes.color
             }
@@ -442,7 +446,7 @@ export default {
         }
         else if (that.all_seetings.data_times == "3hours") {
           if (item.value > 0 && item.value <= 9999) {
-
+            
             if (item.value > 0 && item.value <= 1) {
               var colors = that.themes.color
             }
@@ -477,7 +481,7 @@ export default {
         else {
           // 包含中长期
           if (item.value > 0 && item.value <= 9999) {
-
+            
             if (item.value > 0 && item.value <= 1) {
               var colors = that.themes.color
             }
@@ -571,31 +575,31 @@ export default {
             var tooltips = item.Station_Name + "-" + item.Station_Id_C + "<br>" + "    纬度:" + item.Lat.toFixed(2).toString() + "  " + "经度:" + item.Lon.toFixed(2).toString() + "<br>" + "    " + item.City + "-" + item.Cnty + "-" + item.Town
             that.current_labels.push(tooltips)
             if (((item.value > 0) && (item.value <= 4)) || ((item.WIN_S_Gust_Max > 0) && (item.WIN_S_Gust_Max <= 4))) {
-              var iconurl = that.themes.windurl+"1.svg"
+              var iconurl = that.themes.windurl + "1.svg"
             }
             else if (((item.value > 4) && (item.value <= 8)) || ((item.WIN_S_Gust_Max > 4) && (item.WIN_S_Gust_Max <= 8))) {
-              var iconurl = that.themes.windurl+"2.svg"
+              var iconurl = that.themes.windurl + "2.svg"
             }
             else if (((item.value > 8) && (item.value <= 10)) || ((item.WIN_S_Gust_Max > 8) && (item.WIN_S_Gust_Max <= 10))) {
-              var iconurl = that.themes.windurl+"3.svg"
+              var iconurl = that.themes.windurl + "3.svg"
             }
             else if (((item.value > 10) && (item.value <= 12)) || ((item.WIN_S_Gust_Max > 10) && (item.WIN_S_Gust_Max <= 12))) {
-              var iconurl = that.themes.windurl+"5.svg"
+              var iconurl = that.themes.windurl + "5.svg"
             }
             else if (((item.value > 12) && (item.value <= 14)) || ((item.WIN_S_Gust_Max > 12) && (item.WIN_S_Gust_Max <= 14))) {
-              var iconurl = that.themes.windurl+"6.svg"
+              var iconurl = that.themes.windurl + "6.svg"
             }
             else if (((item.value > 14) && (item.value <= 16)) || ((item.WIN_S_Gust_Max > 14) && (item.WIN_S_Gust_Max <= 16))) {
-              var iconurl = that.themes.windurl+"7.svg"
+              var iconurl = that.themes.windurl + "7.svg"
             }
             else if (((item.value > 16) && (item.value <= 17.2)) || ((item.WIN_S_Gust_Max > 16) && (item.WIN_S_Gust_Max <= 17.2))) {
-              var iconurl = that.themes.windurl+"8.svg"
+              var iconurl = that.themes.windurl + "8.svg"
             }
             else if (((item.value > 17.2) && (item.value <= 19)) || ((item.WIN_S_Gust_Max > 17.2) && (item.WIN_S_Gust_Max <= 19))) {
-              var iconurl = that.themes.windurl+"9.svg"
+              var iconurl = that.themes.windurl + "9.svg"
             }
             else {
-              var iconurl = that.themes.windurl+"10.svg"
+              var iconurl = that.themes.windurl + "10.svg"
             }
             // 常规方法
             // var latlng = L.latLng(item.Lat, item.Lon);
@@ -1008,6 +1012,102 @@ export default {
         }
       }
     },
+    // 以下是地图的图层
+    layer_city_name() {
+      let that = this
+      var layers = L.layerGroup();
+      var city_name = []
+      zhejianglist[0].features.forEach(function (item) {
+        var latlng = L.latLng(item.properties.center[1], item.properties.center[0]);
+        var c = L.circleMarker(latlng, {
+          weight: 0,
+          radius: 1,
+          opacity: 0,
+          fill: false,
+          zIndex: 2,
+          fillOpacity: 1,
+          labelStyle: {
+            text: item.properties.name,
+            collisionFlg: false,
+            // offsetY: -25,
+            scale: 1.5,
+            weight: 1,
+            rotation: 0,
+            fillStyle: "white",
+            zIndex: 1
+          }
+        }).addTo(layers)
+      })
+      return layers
+    },
+    layer_cnty_shp() {
+      let that = this
+      var layers = L.layerGroup();
+      var lines = L.geoJSON(zhejiangcnty, {
+        style: function (feature) {
+          return { color: 'black', fill: false, weight: 1.5, fillOpacity: 0.1 };
+        }
+      }).addTo(layers)
+
+      return layers
+    },
+    layer_cnty_name(){
+      let that = this
+      var layers = L.layerGroup();
+      zhejiangcnty.features.forEach(function(item){
+        var latlng = L.latLng(item.properties.center[1], item.properties.center[0]);
+        var c = L.circleMarker(latlng, {
+          weight: 0,
+          radius: 1,
+          opacity: 0,
+          fill: false,
+          zIndex: 2,
+          fillOpacity: 1,
+          labelStyle: {
+            text: item.properties.name,
+            collisionFlg: false,
+            // offsetY: -25,
+            scale: 1.25,
+            weight: 1,
+            rotation: 0,
+            fillStyle: "white",
+            zIndex: 1
+          }
+        }).addTo(layers)
+
+      })
+      return layers
+
+
+    },
+    layer_town_name(){
+      let that = this
+      var layers = L.layerGroup();
+      zhejiangtownname.forEach(function(item){
+        var latlng = L.latLng(item.lat, item.lon);
+        var c = L.circleMarker(latlng, {
+          weight: 0,
+          radius: 1,
+          opacity: 0,
+          fill: false,
+          zIndex: 2,
+          fillOpacity: 1,
+          labelStyle: {
+            text: item.name,
+            collisionFlg: false,
+            // offsetY: -25,
+            scale: 0.95,
+            weight: 1,
+            rotation: 0,
+            fillStyle: "white",
+            zIndex: 1
+          }
+        }).addTo(layers)
+
+      })
+      return layers
+
+    }
   },
   mounted() {
     let that = this
@@ -1066,10 +1166,10 @@ export default {
     });
     // layer_geo.addTo(map)
     var linecolor = L.geoJSON(zhejianglist, {
-          style: function (feature) {
-            return { color: feature.properties.color, fill: true, weight: 0, fillOpacity: 1 };
-          }
-        })
+      style: function (feature) {
+        return { color: feature.properties.color, fill: true, weight: 0, fillOpacity: 1 };
+      }
+    })
     // 地形图层
     var geogroup = L.layerGroup();
     layer_geo.addTo(geogroup)
@@ -1084,46 +1184,56 @@ export default {
     linecolor.addTo(cleangroup)
     lines.addTo(cleangroup)
     var baseLayers = {
-      '地形': geogroup.addTo(map),
-      '街道': streetgroup,
-      "纯净":cleangroup
+      '地形版': geogroup.addTo(map),
+      '街道版': streetgroup,
+      "纯净版": cleangroup
     };
-    // 额外图层---测试
-    var cities1 = L.layerGroup();
-    var cities2 = L.layerGroup();
-    //声明两个城市marker并添加进图层组
-    var linyi = L.marker([28.01, 121.24]).bindPopup('这里属于青岛').addTo(cities1);
-    var qingdao = L.marker([28.51, 120.92]).bindPopup('这里属于临沂').addTo(cities2);
+    // -------额外图层-----
+    var cnty_shp = that.layer_cnty_shp()
+    var city_name = that.layer_city_name()
+    var cnty_name = that.layer_cnty_name()
+    var town_name = that.layer_town_name()
+    
+    
     var overlays = {
-      '市界': cities1,
-      '县界': cities2,
-      '乡镇名': cities2,
-      '站名': cities2,
-      '风力': cities2,
+      '市县界线': cnty_shp,
+      '地市名称': city_name,
+      '市县名称': cnty_name,
+      '乡镇名称': town_name,
     };
     // 最后整合
     var layerControl = L.control.layers(baseLayers, overlays)
     layerControl.options.position = "topleft"
-    console.log(layerControl) 
     layerControl.addTo(map);
     this.maps = map
-    map.on("baselayerchange",function(e){
+    map.on("baselayerchange", function (e) {
       // 监听
-      switch (e.name){
-        case "地形":
-          console.log("1",e.name);
-          that.themes.windurl ="src/media/wind_white/"
+      switch (e.name) {
+        case "地形版":
+          // console.log("1", e.name);
+          that.themes.windurl = "src/media/wind_white/"
           break;
-        case "街道":
-          console.log("2",e.name);
-          that.themes.windurl ="src/media/wind_black/"
+        case "街道版":
+          // console.log("2", e.name);
+          that.themes.windurl = "src/media/wind_black/"
           break;
-        case "纯净":
-          console.log("3",e.name);
-          that.themes.windurl ="src/media/wind_black/"
+        case "纯净版":
+          // console.log("3", e.name);
+          that.themes.windurl = "src/media/wind_black/"
           break;
       }
     })
+    
+    // map.on("overlayadd", function (e) {
+    //   // 监听
+    //   console.log(e)
+    //   if (e.name=="显示站名"){
+    //     if(that.layer_points.length>0){
+    //       console.log("ok")
+    //     }
+
+    //   }
+    // })
 
     // 循环监听
     window.setInterval(function () {
