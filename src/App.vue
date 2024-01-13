@@ -127,7 +127,9 @@ export default {
       current_layer: [],
       current_points: [],
       current_labels: [],
-      current_type: undefined
+      current_type: undefined,
+      current_single_layer: undefined,
+      current_staiton_layer: undefined
     }
   },
   created() {
@@ -224,6 +226,96 @@ export default {
       };
       L.control.logo({ position: 'bottomright', data: "ok" }).addTo(this.maps);
     },
+    add_single(item, zoom) {
+      let that = this
+      var layers = L.layerGroup();
+      var latlng = L.latLng(item.lat, item.lon);
+      if (zoom <= 9) {
+        var circlerange = 18000
+      }
+      else if (zoom = 10) {
+        var circlerange = 6000
+      }
+      else {
+        var circlerange = 2000
+      }
+      var c = L.circleMarker([item.lat, item.lon], {
+        weight: 0,
+        radius: 0,
+        opacity: 1,
+        fill: false,
+        color: "red",
+        zIndex: 0,
+        fillOpacity: 1,
+        labelStyle: {
+          text: item.Station_Name,
+          collisionFlg: false,
+          offsetY: 20,
+          scale: 1.5,
+          weight: 1,
+          rotation: 0,
+          fillStyle: "red",
+          zIndex: 1000000
+        }
+      }).addTo(layers)
+      that.maps.createPane('circlelop')
+      that.maps.getPane('circlelop').style.zIndex = 500000
+      var circle = new L.Circle([item.lat, item.lon], circlerange, {
+        color: 'red', //颜色
+        pane: 'circlelop',
+        zIndex: 1000000,
+        fill: false
+      }).addTo(layers)
+      if (that.current_single_layer) {
+        that.current_single_layer.remove()
+        layers.addTo(that.maps)
+        that.current_single_layer = layers
+      }
+      else {
+        layers.addTo(that.maps)
+        that.current_single_layer = layers
+      }
+    },
+    add_stations(data, dataType) {
+      let that = this
+      var layers = L.layerGroup();
+      data.forEach(function (item) {
+        if (dataType == "Station_Name") { var labels = item.Station_Name }
+        else if (dataType == "Town") { var labels = item.Town }
+        else if (dataType == "Station_Id_C") { var labels = item.Station_Id_C }
+        else if (dataType == "Alti") { var labels = item.Alti }
+        var c = L.circleMarker([item.Lat, item.Lon], {
+          weight: 0,
+          radius: 0,
+          opacity: 1,
+          fill: false,
+          color: "red",
+          zIndex: 0,
+          fillOpacity: 1,
+          labelStyle: {
+            text: labels,
+            collisionFlg: false,
+            offsetY: 20,
+            scale: 1.25,
+            weight: 1,
+            rotation: 0,
+            fillStyle: "red",
+            zIndex: 1000000
+          }
+        }).addTo(layers)
+      })
+      if (that.current_staiton_layer) {
+        layers.addTo(that.maps)
+        that.current_staiton_layer.remove()
+        that.current_staiton_layer = layers
+      }
+      else {
+        layers.addTo(that.maps)
+        that.current_staiton_layer = layers
+      }
+
+
+    },
     plot_contour(contourf, coloropt) {
       // 绘制等值线
       let that = this
@@ -247,6 +339,7 @@ export default {
           var text_item = item.value
         }
         var latlng = L.latLng(item.Lat, item.Lon);
+
         var c = L.circleMarker(latlng, {
           stationname: item.Station_Name,
           stationnum: item.Station_Id_C,
@@ -257,6 +350,7 @@ export default {
           color: colors,
           fillColor: colors,
           fillOpacity: 1,
+          zIndex: 1000,
           labelStyle: {
             text: text_item,
             collisionFlg: false,
@@ -265,7 +359,7 @@ export default {
             weight: 3,
             rotation: 0,
             fillStyle: colors,
-            zIndex: 60
+            zIndex: 90
           }
         })
         // .bindTooltip(tooltips, {
@@ -283,7 +377,7 @@ export default {
         that.current_labels.push(tooltips)
         if (that.all_seetings.data_times == "5min") {
           if (item.PRE > 0.1 && item.PRE <= 9999) {
-            
+
             if (item.PRE > 0 && item.PRE <= 0.5) {
               // console.log("降水", item)
               var colors = "rgb(140,246,130)"
@@ -313,7 +407,7 @@ export default {
         }
         else if (that.all_seetings.data_times == "now") {
           if (item.value > 0 && item.value < 9999) {
-            
+
             if (item.value > 0 && item.value <= 1) {
               var colors = that.themes.color
             }
@@ -342,7 +436,7 @@ export default {
         }
         else if (that.all_seetings.data_times == "24hours") {
           if (item.value > 0 && item.value <= 9999) {
-             
+
             if (item.value > 0 && item.value <= 1) {
               var colors = that.themes.color
             }
@@ -378,7 +472,7 @@ export default {
         }
         else if (that.all_seetings.data_times == "12hours") {
           if (item.value > 0 && item.value <= 9999) {
-             
+
             if (item.value > 0 && item.value <= 1) {
               var colors = that.themes.color
             }
@@ -412,7 +506,7 @@ export default {
         }
         else if (that.all_seetings.data_times == "6hours") {
           if (item.value > 0 && item.value <= 9999) {
-            
+
             if (item.value > 0 && item.value <= 1) {
               var colors = that.themes.color
             }
@@ -446,7 +540,7 @@ export default {
         }
         else if (that.all_seetings.data_times == "3hours") {
           if (item.value > 0 && item.value <= 9999) {
-            
+
             if (item.value > 0 && item.value <= 1) {
               var colors = that.themes.color
             }
@@ -481,7 +575,7 @@ export default {
         else {
           // 包含中长期
           if (item.value > 0 && item.value <= 9999) {
-            
+
             if (item.value > 0 && item.value <= 1) {
               var colors = that.themes.color
             }
@@ -852,6 +946,7 @@ export default {
         // console.log("测试",toRaw(item),toRaw(that.maps))
         item.bindTooltip(that.current_labels[index], {
           direction: "top",
+          // zIndex: 2000,
           offset: L.point(0, -10)
         }).openTooltip()
         item.addTo(toRaw(that.maps)).on("click", function (e) {
@@ -861,7 +956,6 @@ export default {
           var plot_name = e.sourceTarget.options.stationname
           var labels = plot_name + ":" + plot_num
           that.$refs.extra_single_main.open_single(plot_type, plot_num, model)
-          console.log("单击事件", item, e)
         })
       })
     },
@@ -1051,10 +1145,10 @@ export default {
 
       return layers
     },
-    layer_cnty_name(){
+    layer_cnty_name() {
       let that = this
       var layers = L.layerGroup();
-      zhejiangcnty.features.forEach(function(item){
+      zhejiangcnty.features.forEach(function (item) {
         var latlng = L.latLng(item.properties.center[1], item.properties.center[0]);
         var c = L.circleMarker(latlng, {
           weight: 0,
@@ -1080,10 +1174,10 @@ export default {
 
 
     },
-    layer_town_name(){
+    layer_town_name() {
       let that = this
       var layers = L.layerGroup();
-      zhejiangtownname.forEach(function(item){
+      zhejiangtownname.forEach(function (item) {
         var latlng = L.latLng(item.lat, item.lon);
         var c = L.circleMarker(latlng, {
           weight: 0,
@@ -1193,8 +1287,8 @@ export default {
     var city_name = that.layer_city_name()
     var cnty_name = that.layer_cnty_name()
     var town_name = that.layer_town_name()
-    
-    
+
+
     var overlays = {
       '市县界线': cnty_shp,
       '地市名称': city_name,
@@ -1223,7 +1317,7 @@ export default {
           break;
       }
     })
-    
+
     // map.on("overlayadd", function (e) {
     //   // 监听
     //   console.log(e)

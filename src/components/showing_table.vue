@@ -4,17 +4,17 @@
       :titleStyle="titleStyle">
 
       <div style="width: 100%;height: 100%;overflow-y: hidden;">
-        <lay-table :default-toolbar="false" :columns="columns" :data-source="dataSource" @change="change"  @row="rowchange"
+        <lay-table :default-toolbar="false" :columns="columns" :data-source="dataSource" @change="change" @row="rowchange"
           :page="model.page" height="400px">
           <template #toolbar>
             <lay-input v-model="model.input" style="width: 30%;margin-right: 20px;"></lay-input>
             <lay-button type="primary" size="sm" @click="reset">重置</lay-button>
             <lay-button type="primary" size="sm" @click="search">搜索</lay-button>
             <lay-button type="primary" size="sm" @click="user">筛选</lay-button>
-            <lay-button type="primary" size="sm" @click="stationinfo">显示站名</lay-button>
-            <lay-button type="primary" size="sm" @click="stationinfo">显示乡镇</lay-button>
+            <lay-button type="primary" size="sm" @click="stationinfo">站名信息</lay-button>
+            <lay-button type="primary" size="sm" @click="towninfo">乡镇界线</lay-button>
           </template>
-          
+
         </lay-table>
       </div>
     </lay-layer>
@@ -23,6 +23,7 @@
 
 <script>
 import { ref, nextTick, defineProps, defineEmits } from "vue";
+import { layer } from "@layui/layui-vue";
 export default {
   name: "showing_table",
   data() {
@@ -53,14 +54,61 @@ export default {
     }
   },
   methods: {
-    rowchange(e){
-      let that =this
-      // console.log(e.Lat,"开始操作这一行的数据",that.$parent.$parent.themes)
-      that.$parent.$parent.maps.setView([e.Lat, e.Lon], 9)   
+    rowchange(e) {
+      // 行变化
+      let that = this
+      var zoom = that.$parent.$parent.maps.getZoom()
+      that.$parent.$parent.maps.setView([e.Lat, e.Lon], zoom)
+      var data = {
+        lat: e.Lat,
+        lon: e.Lon,
+        Station_Name: e.Station_Name
+      }
+      that.$parent.$parent.add_single(data, zoom)
     },
-    stationinfo(){
+    add_station(dataType) {
+      // dataSource
+      
+      let that = this
+      console.log(that.dataSource)
+      that.$parent.$parent.add_stations(that.dataSource,dataType)
+    },
+    stationinfo() {
+      let that = this
+      layer.confirm("选择单站信息",
+        {
+          title:"",
+          btn: [
+            {
+              text: '站名', callback: (id) => {
+                that.add_station("Station_Name")
+                layer.close(id);
+              }
+            },
+            {
+              text: '海拔', callback: (id) => {
+                that.add_station("Alti")
+                layer.close(id);
+              }
+            },
+            {
+              text: '站号', callback: (id) => {
+                that.add_station("Station_Id_C")
+                layer.close(id);
+              }
+            },
+            {
+              text: '乡镇', callback: (id) => {
+                that.add_station("Town")
+                layer.close(id);
+              }
+            },
 
+          ]
+        }
+      );
     },
+    towninfo(){},
     reset() {
       let that = this
       if (that.dataSource.length > 0) {
