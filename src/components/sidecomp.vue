@@ -128,7 +128,7 @@
           <lay-button type="primary" class="side-button">刷新</lay-button>
           <lay-button type="primary" class="side-button">查询</lay-button>
         </lay-button-container>
-        
+
 
       </div>
       <!-- *************************************************************** -->
@@ -558,7 +558,9 @@ export default {
     },
     data_real_load() {
       // 实况数据的请求
+
       let that = this
+      var loadid = layer.load(0)
       var value_index = this.model_side.cascader_value.slice(0, 4)
       var tables_obj = {
         "rain": 0,
@@ -570,7 +572,7 @@ export default {
       var tables_index = tables_obj[value_index]
       var tables_name = this.model_side.cascader_value.slice(5, this.model_side.cascader_value.length)
       var model = "zdz"
-      var maindata = that.$parent.main2siderfun()  
+      var maindata = that.$parent.main2siderfun()
 
       var post_data = {
         "model": model,
@@ -585,15 +587,16 @@ export default {
 
       $.ajax({
         url: "http://127.0.0.1:9991/station_zdz_data",  // 请求的地址
-        async: false,
+        // async: true,
         type: "post",  // 请求方式
         timeout: 25000, //设置延迟上限
         data: post_data,
         dataType: "json",
+        beforeSend: function (XMLHttpRequest) {
+
+        },
         success: function (recvdate) {
-          
           recve = recvdate.data
-          
           // 全局参数调配
           that.$parent.flash_map()
           that.$parent.current_type = recvdate.click_type
@@ -601,38 +604,39 @@ export default {
           var data = JSON.parse(recvdate.data)
           if (recvdate.click_type == "rain") {
             var rain_points = that.$parent.plot_rain(data)
-            that.$parent.point_event(rain_points,"zdz")
+            that.$parent.point_event(rain_points, "zdz")
           }
           else if (recvdate.click_type == "wind") {
-            console.log("测试子组件调用父组件", that.$parent.warring_table_status)
+            console.log("测试子组件调用父组件", that.$parent.warring_table_status, load)
             var wind_points = that.$parent.plot_wind(data)
             if (that.$parent.all_seetings.wind_suf_opt == "barb") {
-              that.$parent.mark_event(wind_points,"zdz")
+              that.$parent.mark_event(wind_points, "zdz")
             }
             else {
-              that.$parent.point_event(wind_points,"zdz")
+              that.$parent.point_event(wind_points, "zdz")
             }
           }
           else if ((recvdate.click_type == "tmax") || (recvdate.click_type == "tmin")) {
             var temp_points = that.$parent.plot_temp(data)
-            that.$parent.point_event(temp_points,"zdz")
+            that.$parent.point_event(temp_points, "zdz")
           }
           else if (recvdate.click_type == "view") {
             var view_points = that.$parent.plot_view(data)
-            that.$parent.point_event(view_points,"zdz")
+            that.$parent.point_event(view_points, "zdz")
           }
           that.$refs.showing_table.opentable(true, data)
-          that.$parent.loading = true
-          layer.msg("加载成功", { icon : 1, time: 400})
+        },
+        complete: function () {
+          layer.close(loadid)
         }
 
       })
-
+      
     },
     open_single_station() {
       var station_id = undefined
       var plot_type = undefined
-      this.$refs.extra_single.open_single(plot_type,station_id)
+      this.$refs.extra_single.open_single(plot_type, station_id)
     },
     open_his_data() {
       this.$refs.his_data.open_his_data()
@@ -735,6 +739,7 @@ export default {
   },
   mounted() {
     let that = this
+
     var today = new Date()
     var y = today.getFullYear();
     var m = today.getMonth() + 1 < 10 ? "0" + (today.getMonth() + 1) : today.getMonth() + 1;
