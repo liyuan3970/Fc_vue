@@ -24,8 +24,9 @@
                   <div style="display: inline-flex;;width: 100%;">
                     <lay-select v-model="model_side.datarange">
                       <lay-select-option value="10min" label="实时"></lay-select-option>
-                      <lay-select-option value="rain03" label="3小时"></lay-select-option>
-                      <lay-select-option value="rain06" label="6小时"></lay-select-option>
+                      <lay-select-option value="rain1" label="1小时"></lay-select-option>
+                      <lay-select-option value="rain3" label="3小时"></lay-select-option>
+                      <lay-select-option value="rain6" label="6小时"></lay-select-option>
                       <lay-select-option value="rain12" label="12小时"></lay-select-option>
                       <lay-select-option value="rain24" label="24小时"></lay-select-option>
                     </lay-select>
@@ -187,18 +188,14 @@ export default {
         {
           text: "确认",
           callback: () => {
-            // var send_data = {}
-            // send_data.send_type = "seeting" 
-            this.$parent.dataopt = this.model_side.dataopt
-            this.$parent.rainopt = this.model_side.rainopt
-            this.$parent.windopt = this.model_side.windopt
-            this.$parent.viewopt = this.model_side.viewopt
-            this.$parent.tempopt = this.model_side.tempopt
-            this.$parent.rainrange = parseInt(this.model_side.rainrange)
-            this.$parent.windrange = parseInt(this.model_side.windrange)
-            this.$parent.viewrange = parseInt(this.model_side.viewrange)
-            this.$parent.temprange = parseInt(this.model_side.temprange)
-            // this.$emit('side-event', send_data)
+            this.$parent.all_seetings.data_times = this.model_side.datarange
+            this.$parent.all_seetings.dataopt = this.model_side.dataopt
+            this.$parent.all_seetings.rainopt = this.model_side.rainopt
+            this.$parent.all_seetings.windopt = this.model_side.windopt
+            this.$parent.all_seetings.viewopt = this.model_side.viewopt
+            this.$parent.all_seetings.warring_rain_value = parseInt(this.model_side.rainrange)
+            this.$parent.all_seetings.warring_wind_value = parseInt(this.model_side.windrange)
+            this.$parent.all_seetings.warring_view_value = parseInt(this.model_side.viewrange)
             this.visible_warring = false
           }
         },
@@ -516,20 +513,25 @@ export default {
   methods: {
     real_change(value) {
       let that = this
+      // console.log("同步切换",value)
       if (value == "silence") {
-        var send_data = {}
-        send_data.send_type = "warring"
-        send_data.real_flash_opt = value
-        that.$emit('side-event', send_data)
+        that.$parent.all_seetings.data_times = that.model_side.datarange
+        that.$parent.all_seetings.real_flash_opt = "silence"
+      }
+      else {
+        that.$parent.all_seetings.data_times = that.model_side.datarange
+        that.$parent.all_seetings.real_flash_opt = "update"
       }
     },
     warring_change(value) {
       let that = this
+      // console.log("报警切换",value)
       if (value == "silence") {
-        var send_data = {}
-        send_data.send_type = "warring"
-        send_data.warring_opt = value
-        that.$emit('side-event', send_data)
+        that.$parent.all_seetings.warring_opt = "silence"
+        that.$parent.mp3_play = false
+      }
+      else {
+        that.$parent.all_seetings.warring_opt = "warring"
       }
     },
     radar_change(value) {
@@ -607,7 +609,6 @@ export default {
             that.$parent.point_event(rain_points, "zdz")
           }
           else if (recvdate.click_type == "wind") {
-            console.log("测试子组件调用父组件", that.$parent.warring_table_status, load)
             var wind_points = that.$parent.plot_wind(data)
             if (that.$parent.all_seetings.wind_suf_opt == "barb") {
               that.$parent.mark_event(wind_points, "zdz")
@@ -631,7 +632,7 @@ export default {
         }
 
       })
-      
+
     },
     open_single_station() {
       var station_id = undefined
@@ -663,78 +664,79 @@ export default {
     },
     request_warring() {
       let that = this
-      axios.post('http://127.0.0.1:9991/station_zdz_warring', {
-        rain_type: that.model_side.datarange,
-        name: localStorage.getItem("name")
-      }).then(function (result) {
-        // 正常处理
-        var value = result.data
-        value.send_type = "warring"
-        value.real_flash_opt = that.model_side.real_flash_opt
-        value.warring_opt = that.model_side.warring_opt
-        // 开始报警的相关操作
-        if ((value.real_flash_opt == "update") || (value.warring_opt == "warring")) {
-          that.$parent.flash_map()
-          // 数据操作
-          var contourf = JSON.parse(value.radar['imglist'][value.radar['imglist'].length - 1])
-          var colotopt = that.$parent.color_opt.radar
-          var rain = JSON.parse(value.rain)
-          var wind = JSON.parse(value.wind)
-          var rainList = that.$parent.update_user_data(rain)
-          var windList = that.$parent.update_user_data(wind)
-          const mergedArray = [...rainList, ...windList]
-          if (value.real_flash_opt == "update") {
-            // 更新地图
-            if (that.$parent.all_seetings.shpopt) {
-              if (localStorage.getItem("userName") != "none") {
-                var shpdata = JSON.parse(localStorage.getItem('userShp'))
-                var shplayer = L.geoJSON(shpdata, {
-                  style: function (feature) {
-                    return { color: 'red', weight: 1.5, fillOpacity: 0.01 };
-                  }
-                })
-                shplayer.addTo(that.$parent.maps)
-                that.$parent.current_layer.push(shplayer)
+      var post_data = {
+        "rain_type": that.model_side.datarange,
+        "name": localStorage.getItem("name")
+      }
+      $.ajax({
+        url: "http://127.0.0.1:9991/api/warring_sync",  // 请求的地址
+        // async: true,
+        type: "post",  // 请求方式
+        timeout: 25000, //设置延迟上限
+        data: JSON.stringify(post_data),
+        dataType: "json",
+        success: function (recvdate) {
+          // console.log("数据接收成功",post_data,recvdate)
+          if ((that.$parent.all_seetings.real_flash_opt == "update") || (that.$parent.all_seetings.warring_opt == "warring")) {
+            that.$parent.flash_map()
+            // 数据操作
+            var contourf = JSON.parse(recvdate.radar)
+            var colotopt = that.$parent.color_opt.radar
+            var rain = JSON.parse(recvdate.rain)
+            var wind = JSON.parse(recvdate.wind)
+            var view = JSON.parse(recvdate.view)
+            var rainList = that.$parent.update_user_data(rain)
+            var windList = that.$parent.update_user_data(wind)
+            var viewList = that.$parent.update_user_data(view)
+
+            const mergedArray = [...rainList, ...windList]
+            if (viewList.length>0){
+              viewList.forEach(function(item){
+                if (item){
+                  mergedArray.push(item)
+                }
+              });
+              console.log(viewList)
+            }
+            if (that.$parent.all_seetings.real_flash_opt == "update") {
+              // 更新地图
+              if (that.$parent.all_seetings.shpopt) {
+                if (localStorage.getItem("userName") != "none") {
+                  var shpdata = JSON.parse(localStorage.getItem('userShp'))
+                  var shplayer = L.geoJSON(shpdata, {
+                    style: function (feature) {
+                      return { color: 'red', weight: 1.5, fillOpacity: 0.01 };
+                    }
+                  })
+                  shplayer.addTo(that.$parent.maps)
+                  that.$parent.current_layer.push(shplayer)
+                }
+              }
+              // 绘图
+              that.$parent.all_seetings.data_times = that.model_side.datarange
+              that.$parent.plot_contour(contourf, colotopt)
+              // 绘图降水
+              var rain_points = that.$parent.plot_rain(rain)
+              var model = "warring"
+              that.$parent.point_event(rain_points,model)
+              // 绘图风力
+              that.$parent.all_seetings.wind_suf_opt = "barb"
+              var wind_points = that.$parent.plot_wind(wind)
+              that.$parent.mark_event(wind_points,model)
+            }
+            if (that.$parent.all_seetings.warring_opt == "warring") {
+              if (mergedArray.length > 0) {
+                that.$parent.mp3_play = true
+              }
+              else {
+                that.$parent.mp3_play = false
               }
             }
-            // 绘图
-            that.$parent.all_seetings.data_times = "5min"
-            that.$parent.plot_contour(contourf, colotopt)
-            // 绘图降水
-            var rain_points = that.$parent.plot_rain(rain)
-            that.$parent.point_event(rain_points)
-            // 绘图风力
-            that.$parent.all_seetings.wind_suf_opt = "barb"
-            var wind_points = that.$parent.plot_wind(wind)
-            that.$parent.mark_event(wind_points)
+            // 打开表格
+            that.$parent.$refs.warring_table.opentable(true, mergedArray)
           }
-          if (value.warring_opt == "warring") {
-            if (mergedArray.length > 0) {
-              that.$parent.mp3_play = true
-            }
-            else {
-              that.$parent.mp3_play = false
-            }
-          }
-          // 打开表格
-          that.$parent.$refs.warring_table.opentable(true, mergedArray)
         }
-        else if (value.real_flash_opt == "silence") {
-          that.$parent.all_seetings.real_flash_opt = value.real_flash_opt
-          this.$refs.warring_table.opentable(false, undefined)
-        }
-        else if (value.warring_opt == "silence") {
-          that.$parent.all_seetings.warring_opt = value.warring_opt
-          that.$parent.mp3_play = false
-        }
-        // 结束
-        // that.$emit('side-event', send_data)
-      }).catch(function (error) {
-        //异常  
-        console.log(error);
-      }).finally(function () {
-        // 总是会执行
-      });
+      })
     }
   },
   mounted() {
@@ -754,13 +756,9 @@ export default {
         this.request_warring()
       }
       else {
-        var send_data = {}
-        send_data.send_type = "warring"
-        send_data.real_flash_opt = that.model_side.real_flash_opt
-        send_data.warring_opt = that.model_side.warring_opt
-        that.$emit('side-event', send_data)
+        // 定时获取reids数据
       }
-    }, 1000)
+    }, 10000)
   }
 
 }

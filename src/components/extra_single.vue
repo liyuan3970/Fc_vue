@@ -110,11 +110,11 @@ export default {
       var days = Math.floor(ms / (24 * 3600 * 1000));
       if (days < 120) {
         var model = "zdz"
-        console.log("数据分析")
+        // console.log("数据分析")
       }
       else {
         var model = "zdz_history"
-        console.log("数据分析2")
+        // console.log("数据分析2")
       }
     },
     open_single(plot_type, plot_name, model) {
@@ -134,9 +134,12 @@ export default {
           if (model == "zdz") {
             that.get_line(plot_type, plot_name, today_str)
           }
-          else {
+          else if(model == "his") {
             that.model.times = that.$parent.model_side.his_times
             that.get_his_line(plot_type, plot_name, that.$parent.model_side.his_times)
+          }
+          else{
+            console.log("单站按钮禁用")
           }
 
         })

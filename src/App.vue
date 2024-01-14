@@ -91,11 +91,11 @@ export default {
         rainopt: true,
         windopt: true,
         tempopt: true,
-        viewopt: true,
-        warring_rain_value: 0,
-        warring_wind_value: 0,
+        viewopt: false,
+        warring_rain_value: 3,
+        warring_wind_value: 17,
         warring_temp_value: 0,
-        warring_view_value: 0,
+        warring_view_value: 1000,
         real_flash_opt: 'silence',// 同步绘制开关
         warring_opt: 'silence',// 报警开关
         radar_opt: false,//雷达回波叠加的开关
@@ -375,7 +375,7 @@ export default {
       data.forEach(function (item) {
         var tooltips = item.Station_Name + "-" + item.Station_Id_C + "<br>" + "    纬度:" + item.Lat.toFixed(2).toString() + "  " + "经度:" + item.Lon.toFixed(2).toString() + "<br>" + "    " + item.City + "-" + item.Cnty + "-" + item.Town
         that.current_labels.push(tooltips)
-        if (that.all_seetings.data_times == "5min") {
+        if (that.all_seetings.data_times == "10min") {
           if (item.PRE > 0.1 && item.PRE <= 9999) {
 
             if (item.PRE > 0 && item.PRE <= 0.5) {
@@ -943,10 +943,8 @@ export default {
       // 绘制单点数据
       let that = this
       points.forEach(function (item, index) {
-        // console.log("测试",toRaw(item),toRaw(that.maps))
         item.bindTooltip(that.current_labels[index], {
           direction: "top",
-          // zIndex: 2000,
           offset: L.point(0, -10)
         }).openTooltip()
         item.addTo(toRaw(that.maps)).on("click", function (e) {
@@ -955,7 +953,9 @@ export default {
           var plot_num = e.sourceTarget.options.stationnum
           var plot_name = e.sourceTarget.options.stationname
           var labels = plot_name + ":" + plot_num
-          that.$refs.extra_single_main.open_single(plot_type, plot_num, model)
+          if ((model == "zdz") || (model == "his")) {
+            that.$refs.extra_single_main.open_single(plot_type, plot_num, model)
+          }
         })
       })
     },
@@ -965,8 +965,6 @@ export default {
       var ciLayer = L.canvasMarkerLayer({
         collisionFlg: false
       }).addTo(that.maps)
-      // ciLayer.addLayers(marks)
-      // that.current_layer.push(ciLayer)
       var wind_list = []
       marks.forEach(function (item) {
         var latlng = L.latLng(item.Lat, item.Lon);
@@ -975,24 +973,23 @@ export default {
         markopt.icon = icon
         var latlng = L.latLng(item.lat, item.lon)
         var marker = L.marker(latlng, markopt)
-        // .bindTooltip(item.tooltips, {
-        //   direction: "top",
-        //   offset: L.point(0, -10)
-        // }).openTooltip();
         marker.setRotationAngle(item.iconopt.rotationAngle);
         wind_list.push(marker)
       })
       ciLayer.addLayers(wind_list)
       that.current_layer.push(ciLayer)
-      ciLayer.addOnClickListener(function (e, data) {
-        var station_id = undefined
-        var plot_type = that.current_type
-        var plot_num = data[0].data.options.icon.options.stationnum
-        var plot_name = data[0].data.options.icon.options.stationname
-        var labels = plot_name + ":" + plot_num
-        that.$refs.extra_single_main.open_single(plot_type, plot_num)
-        // console.log("标记mark", e, data)
-      })
+      if ((model == "zdz") || (model == "his")) {
+        ciLayer.addOnClickListener(function (e, data) {
+          var station_id = undefined
+          var plot_type = that.current_type
+          var plot_num = data[0].data.options.icon.options.stationnum
+          var plot_name = data[0].data.options.icon.options.stationname
+          var labels = plot_name + ":" + plot_num
+          that.$refs.extra_single_main.open_single(plot_type, plot_num)
+          // console.log("标记mark", e, data)
+        })
+      }
+
       ciLayer.addOnHoverListener(function (e, data) {
         if (that.wind_label) {
           toRaw(that.wind_label).remove()
@@ -1012,6 +1009,8 @@ export default {
           }).openTooltip()
         that.wind_label = toRaw(c)
       });
+
+
     },
     update_user_data(data) {
       let that = this
@@ -1019,17 +1018,21 @@ export default {
       var warringshp = JSON.parse(localStorage.getItem("warringShp"))
       var bbox = turf.bbox(warringshp);
       var warringList = []
-      if (localStorage.getItem("userName") != "none") {
-        var bbox = turf.bbox(warringshp);
+      if (localStorage.getItem("userName") != "none") { 
+        var poly = turf.polygon(warringshp.features[0].geometry.coordinates)
       }
       else {
         var bbox = turf.bbox(taizhoulocal);
+        // console.log("数据2", bbox)
       }
       data.forEach(function (item) {
         // 判断区域
-        if ((item.Lat > bbox[1]) && (item.Lat < bbox[3]) && (item.Lon > bbox[0]) && (item.Lon < bbox[2])) {
+        var points = turf.point([item.Lon, item.Lat]);
+        
+        if (turf.booleanPointInPolygon(points, poly)) {
           // 判断预警等级
-          if ((item.PRE > that.all_seetings.warring_rain_value) || (item.WIN_S_Gust_Max > that.all_seetings.warring_wind_value)) {
+          
+          if ((item.PRE > that.all_seetings.warring_rain_value) || (item.WIN_S_Gust_Max > that.all_seetings.warring_wind_value)|| (item.VIS_HOR_1MI < that.all_seetings.warring_view_value)) {
 
             if ((item.WIN_S_Gust_Max != undefined) && (that.all_seetings.windopt)) {
               var single = {
@@ -1047,6 +1050,16 @@ export default {
                 'Station_Name': item.Station_Name,
                 'type': "降水",
                 'value': item.PRE.toString()
+              }
+            }
+            else if ((item.VIS_HOR_1MI != undefined) && (that.all_seetings.viewopt)) {
+              console.log(item)
+              var single = {
+                'City': item.City,
+                'Station_Id_C': item.Station_Id_C,
+                'Station_Name': item.Station_Name,
+                'type': "能见度",
+                'value': item.VIS_HOR_1MI.toString()
               }
             }
             warringList.push(single)
