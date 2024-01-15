@@ -308,9 +308,7 @@ export default {
       let that = this
       that.maps.createPane('town_line');
       that.maps.getPane('town_line').style.zIndex = 400;
-      var layers = L.layerGroup({
-        
-      });
+      var layers = L.layerGroup();
       // layers.setZIndex(0)
       var lines = L.geoJSON(data, {
         pane: 'town_line',
