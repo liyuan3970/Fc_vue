@@ -9,7 +9,7 @@
       <buttontable></buttontable>
       <buttonhightchart></buttonhightchart>
       <button>测试按钮</button> -->
-    <sidecomp @side-event="sideEvent"></sidecomp>
+    <sidecomp @side-event="sideEvent" ref="sidecomp"></sidecomp>
     <warring_table ref="warring_table"></warring_table>
     <radar_section ref="radar_section"></radar_section>
     <extra_single ref="extra_single_main"></extra_single>
@@ -24,6 +24,7 @@ import zhejianglist from "./json/zhejianglist.json"
 import taizhoulocal from "./json/331000.json"
 import zhejiangcnty from './json/zhejiangcnty.json'
 import zhejiangtownname from './json/zhejiangtownname'
+import taizhouwarring from './json/warringtaizhou.json'
 import $ from 'jquery'
 // 组件的引用
 import { layer } from "@layui/layui-vue"
@@ -69,6 +70,7 @@ export default {
       plot_data: undefined,
       plot_type: undefined,
       plot_colors: undefined,
+      baseurl:"http://127.0.0.1:9991/",
       maps: undefined,
       mp3src: "http://127.0.0.1:9991/media/mp3/warring.mp3",
       mp3_play: false,
@@ -92,15 +94,13 @@ export default {
         windopt: true,
         tempopt: true,
         viewopt: false,
-        warring_rain_value: 3,
+        warring_rain_value: 1,
         warring_wind_value: 17,
-        warring_temp_value: 0,
         warring_view_value: 1000,
         real_flash_opt: 'silence',// 同步绘制开关
         warring_opt: 'silence',// 报警开关
         radar_opt: false,//雷达回波叠加的开关
         radar_sec: {
-          plot_opt: false,
           p1: undefined,
           p2: undefined,
           line: undefined
@@ -129,7 +129,8 @@ export default {
       current_labels: [],
       current_type: undefined,
       current_single_layer: undefined,
-      current_staiton_layer: undefined
+      current_staiton_layer: undefined,
+      current_townline_layer:undefined
     }
   },
   created() {
@@ -147,7 +148,7 @@ export default {
       else {
         var boundary = [25, 35, 115, 125]
       }
-      maindata.boundary = JSON.stringify(boundary)
+      maindata.boundary = JSON.stringify(boundary) 
       maindata.zoom = this.maps.getZoom()
       return maindata
     },
@@ -161,20 +162,7 @@ export default {
     sideEvent(value) {
       // 侧边栏收到的参数 
       let that = this
-      // 更具类型解析并判断如何调用方法
-
-
-      if (value.send_type == "real_seeting") {
-        //雷达剖面
-        that.all_seetings.radar_opt = value.radar_opt
-        that.all_seetings.radar_sec.plot_opt = value.plot_opt
-        if (value.plot_opt) {
-          that.radar_sec_on()
-        }
-        else {
-          that.radar_sec_off()
-        }
-      }
+      // 接收参数      
     },
     flash_map() {
       let that = this
@@ -315,6 +303,32 @@ export default {
       }
 
 
+    },
+    add_town_line(data){
+      let that = this
+      that.maps.createPane('town_line');
+      that.maps.getPane('town_line').style.zIndex = 400;
+      var layers = L.layerGroup({
+        
+      });
+      // layers.setZIndex(0)
+      var lines = L.geoJSON(data, {
+        pane: 'town_line',
+        style: function (feature) {
+          return  { color: 'red', fill: false, weight: 1, fillOpacity: 0.1 };
+        }
+      })
+      lines.addTo(layers)
+      
+      if (that.current_townline_layer){
+        layers.addTo(that.maps)
+        that.current_townline_layer.remove()
+        that.current_townline_layer = layers
+      }
+      else{
+        layers.addTo(that.maps)
+        that.current_townline_layer = layers
+      }
     },
     plot_contour(contourf, coloropt) {
       // 绘制等值线
@@ -1014,16 +1028,19 @@ export default {
     },
     update_user_data(data) {
       let that = this
-      var usershp = JSON.parse(localStorage.getItem("userShp"))
-      var warringshp = JSON.parse(localStorage.getItem("warringShp"))
-      var bbox = turf.bbox(warringshp);
+      
       var warringList = []
-      if (localStorage.getItem("userName") != "none") { 
+      if (localStorage.getItem("userName")) { 
+        // var usershp = JSON.parse(localStorage.getItem("userShp"))
+        var warringshp = JSON.parse(localStorage.getItem("warringShp"))
         var poly = turf.polygon(warringshp.features[0].geometry.coordinates)
+        // console.log("保存数据",warringshp.features[0].geometry.coordinates) 
       }
       else {
-        var bbox = turf.bbox(taizhoulocal);
-        // console.log("数据2", bbox)
+        // taizhouwarring
+        var poly = turf.polygon(taizhouwarring)
+        // console.log("保存数据",poly) 
+        // var bbox = turf.bbox(taizhoulocal);
       }
       data.forEach(function (item) {
         // 判断区域
@@ -1053,7 +1070,6 @@ export default {
               }
             }
             else if ((item.VIS_HOR_1MI != undefined) && (that.all_seetings.viewopt)) {
-              console.log(item)
               var single = {
                 'City': item.City,
                 'Station_Id_C': item.Station_Id_C,
@@ -1082,6 +1098,9 @@ export default {
       var start = that.all_seetings.radar_sec.p1.lng.toString() + "," + that.all_seetings.radar_sec.p1.lat.toString()
       var end = that.all_seetings.radar_sec.p2.lng.toString() + "," + that.all_seetings.radar_sec.p2.lat.toString()
       that.$refs.radar_section.changeVisible(start, end)
+      // 关闭雷达剖面
+      that.$refs.sidecomp.model_side.radar_sec_opt = "none"
+      that.radar_sec_off()
     },
     convert(lon, lat) {
       x = lon * 20037508.34 / 180

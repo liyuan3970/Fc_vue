@@ -82,7 +82,7 @@ export default {
   name: "headercomp",
   data() {
     return {
-      notice: "台州市气象台：目前北方有一股较强冷空气",
+      notice: "",
       title_set: "设置",
       visible_set: false,
       titleStyle: {

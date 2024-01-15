@@ -20,15 +20,15 @@
             :title=title_warring>
             <div style="padding: 30px 15px;">
               <lay-panel style="width: 90%;height: 420px;">
-                <lay-form-item label="数据" mode="inline" style="width: 100%;padding-top: 20px;">
+                <lay-form-item label="同步" mode="inline" style="width: 100%;padding-top: 20px;">
                   <div style="display: inline-flex;;width: 100%;">
                     <lay-select v-model="model_side.datarange">
-                      <lay-select-option value="10min" label="实时"></lay-select-option>
-                      <lay-select-option value="rain1" label="1小时"></lay-select-option>
-                      <lay-select-option value="rain3" label="3小时"></lay-select-option>
-                      <lay-select-option value="rain6" label="6小时"></lay-select-option>
-                      <lay-select-option value="rain12" label="12小时"></lay-select-option>
-                      <lay-select-option value="rain24" label="24小时"></lay-select-option>
+                      <lay-select-option value="10min" label="近5分钟降水"></lay-select-option>
+                      <lay-select-option value="rain1" label="1小时降水"></lay-select-option>
+                      <lay-select-option value="rain3" label="3小时降水"></lay-select-option>
+                      <lay-select-option value="rain6" label="6小时降水"></lay-select-option>
+                      <lay-select-option value="rain12" label="12小时降水"></lay-select-option>
+                      <lay-select-option value="rain24" label="24小时降水"></lay-select-option>
                     </lay-select>
                     <lay-checkbox v-model="model_side.dataopt">边界</lay-checkbox>
                   </div>
@@ -36,13 +36,18 @@
                 <lay-form-item label="降水" mode="inline" style="width: 100%;padding-top: 20px;">
                   <div style="display: inline-flex;;width: 100%;">
                     <lay-select v-model="model_side.rainrange">
-                      <lay-select-option value="3" label="3毫米"></lay-select-option>
+                      <lay-select-option value="1" label="1毫米"></lay-select-option>
+                      <lay-select-option value="4" label="5毫米"></lay-select-option>
                       <lay-select-option value="10" label="10毫米"></lay-select-option>
                       <lay-select-option value="30" label="30毫米"></lay-select-option>
                       <lay-select-option value="40" label="40毫米"></lay-select-option>
                       <lay-select-option value="50" label="50毫米"></lay-select-option>
                       <lay-select-option value="70" label="70毫米"></lay-select-option>
+                      <lay-select-option value="80" label="80毫米"></lay-select-option>
                       <lay-select-option value="90" label="90毫米"></lay-select-option>
+                      <lay-select-option value="100" label="100毫米"></lay-select-option>
+                      <lay-select-option value="100" label="150毫米"></lay-select-option>
+                      <lay-select-option value="200" label="200毫米"></lay-select-option>
                     </lay-select>
                     <lay-checkbox v-model="model_side.rainopt">开启</lay-checkbox>
                   </div>
@@ -212,7 +217,7 @@ export default {
         warring_opt: 'silence',
         datarange: '10min',
         dataopt: true,
-        rainrange: "3",
+        rainrange: "1",
         rainopt: true,
         windrange: "17.3",
         windopt: true,
@@ -537,25 +542,19 @@ export default {
     radar_change(value) {
       let that = this
       if (value == "plot") {
-        var send_data = {}
-        send_data.send_type = "real_seeting"
-        send_data.radar_opt = true
-        that.$emit('side-event', send_data)
+        that.$parent.all_seetings.radar_opt = true
+      }
+      else{
+        that.$parent.all_seetings.radar_opt = false
       }
     },
     sec_change(value) {
       let that = this
       if (value == "plot") {
-        var send_data = {}
-        send_data.send_type = "real_seeting"
-        send_data.plot_opt = true
-        that.$emit('side-event', send_data)
+        that.$parent.radar_sec_on()
       }
       else {
-        var send_data = {}
-        send_data.send_type = "real_seeting"
-        send_data.plot_opt = false
-        that.$emit('side-event', send_data)
+        that.$parent.radar_sec_off()
       }
     },
     data_real_load() {
@@ -575,34 +574,44 @@ export default {
       var tables_name = this.model_side.cascader_value.slice(5, this.model_side.cascader_value.length)
       var model = "zdz"
       var maindata = that.$parent.main2siderfun()
-
+      var radarplot = "no"
+      if (that.$parent.all_seetings.radar_opt){
+        radarplot = "yes"
+      }
       var post_data = {
         "model": model,
         "table_type": maindata.datarange,//数据类型
-        "table_index": tables_index,
+        "value_index": tables_index,
         "boundary": maindata.boundary,
         "click_type": value_index,
         "zoom": maindata.zoom,
-        "button_value": tables_name
+        "tables_name": tables_name,
+        "radarplot":radarplot
       }
       var recve = undefined
-
       $.ajax({
-        url: "http://127.0.0.1:9991/station_zdz_data",  // 请求的地址
+        url: that.$parent.baseurl + "api/station_real",  // 请求的地址
         // async: true,
         type: "post",  // 请求方式
         timeout: 25000, //设置延迟上限
-        data: post_data,
+        data: JSON.stringify(post_data),
         dataType: "json",
         beforeSend: function (XMLHttpRequest) {
 
         },
         success: function (recvdate) {
+          // console.log("接收数据",recvdate)
           recve = recvdate.data
           // 全局参数调配
           that.$parent.flash_map()
           that.$parent.current_type = recvdate.click_type
           that.$parent.all_seetings.data_times = recvdate.tables_name
+          if (that.$parent.all_seetings.radar_opt){
+            var contourf = JSON.parse(recvdate.radar)
+            var colotopt = that.$parent.color_opt.radar
+            that.$parent.plot_contour(contourf, colotopt)
+
+          }
           var data = JSON.parse(recvdate.data)
           if (recvdate.click_type == "rain") {
             var rain_points = that.$parent.plot_rain(data)
@@ -664,12 +673,18 @@ export default {
     },
     request_warring() {
       let that = this
+      if (localStorage.getItem("name")){
+        var name = localStorage.getItem("name")
+      }
+      else{
+        var name = "331000"
+      }
       var post_data = {
         "rain_type": that.model_side.datarange,
-        "name": localStorage.getItem("name")
+        "name": name
       }
       $.ajax({
-        url: "http://127.0.0.1:9991/api/warring_sync",  // 请求的地址
+        url: that.$parent.baseurl + "api/warring_sync",  // 请求的地址
         // async: true,
         type: "post",  // 请求方式
         timeout: 25000, //设置延迟上限
@@ -696,7 +711,7 @@ export default {
                   mergedArray.push(item)
                 }
               });
-              console.log(viewList)
+              // console.log(viewList)
             }
             if (that.$parent.all_seetings.real_flash_opt == "update") {
               // 更新地图
@@ -754,9 +769,6 @@ export default {
       //需要定时执行的代码
       if ((that.model_side.real_flash_opt == "update") || (that.model_side.warring_opt == "warring")) {
         this.request_warring()
-      }
-      else {
-        // 定时获取reids数据
       }
     }, 10000)
   }

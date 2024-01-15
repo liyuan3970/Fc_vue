@@ -24,6 +24,7 @@
 <script>
 import { ref, nextTick, defineProps, defineEmits } from "vue";
 import { layer } from "@layui/layui-vue";
+import $ from 'jquery'
 export default {
   name: "showing_table",
   data() {
@@ -68,16 +69,16 @@ export default {
     },
     add_station(dataType) {
       // dataSource
-      
+
       let that = this
       console.log(that.dataSource)
-      that.$parent.$parent.add_stations(that.dataSource,dataType)
+      that.$parent.$parent.add_stations(that.dataSource, dataType)
     },
     stationinfo() {
       let that = this
       layer.confirm("选择单站信息",
         {
-          title:"",
+          title: "",
           btn: [
             {
               text: '站名', callback: (id) => {
@@ -108,7 +109,36 @@ export default {
         }
       );
     },
-    towninfo(){},
+    towninfo() {
+      let that = this
+      var townlist = []
+      that.dataSource.forEach(function (item) {
+        if (!townlist.includes(item.Cnty)) {
+          townlist.push(item.Cnty)
+        }
+      })
+      var post_data = {
+        "datatype": "get_town_line",
+        "data":JSON.stringify(townlist)
+      }
+      var recve = undefined
+      var loadid = layer.load(0)
+      $.ajax({
+        url: that.$parent.$parent.baseurl + "api/get_town_line",  // 请求的地址
+        // async: true,
+        type: "post",  // 请求方式
+        timeout: 25000, //设置延迟上限
+        data: JSON.stringify(post_data),
+        dataType: "json",
+        success: function (recvdate) {
+          that.$parent.$parent.add_town_line(JSON.parse(recvdate.data))
+
+        },
+        complete: function () {
+          layer.close(loadid)
+        }
+      })
+    },
     reset() {
       let that = this
       if (that.dataSource.length > 0) {
